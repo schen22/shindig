@@ -79,49 +79,45 @@
 /* ── 3 · Layer 3 · derived surfaces (§4.4) ──────────────────────────────────
    Named once so components never carry raw percentages.
 
-   STATIC FALLBACK FIRST, per §4.4's fallback rule: color-mix() sits on the
-   §3.1 support floor, and an unsupported value takes the whole declaration
-   with it — the property does not degrade, it collapses, and everything
-   downstream collapses with it.
+   NO STATIC FALLBACK, AND NO @supports — the modern declaration, alone.
 
-   The fallback is var(--t-ink), NOT §8.3's literal alpha value for --t-line.
-   That literal is light-mode Taskmaster ink written out by hand, which
-   contradicts §4.4's own first line ("colour exists in exactly one place") and
-   renders a near-black hairline on a near-black ground in dark mode. Falling
-   back to the ink token keeps the border present and correct in both modes,
-   and costs only subtlety on browsers below the floor. Flagged in the Wave 1b
-   report rather than resolved silently.
+   §4.4's two-declaration fallback rule was WITHDRAWN (2026-08-17) after being
+   measured at this boundary. It could not work for a custom property: the value
+   is an arbitrary token stream, so the color-mix() line parses and wins the
+   cascade even where color-mix is unsupported, leaving the fallback unreachable
+   — and lightningcss, minifying against the §3.1 targets, deleted the fallback
+   line outright, so in production it was absent rather than merely inert.
 
-   ESCALATED, NOT FIXED HERE — measured at the Wave 1b boundary, twice:
-     1. For a CUSTOM PROPERTY the two-declaration pattern cannot work on its
-        own. Custom-property values are arbitrary token streams, so the
-        color-mix() line is always valid at parse time and always wins the
-        cascade whether or not the browser supports the function. The failure
-        surfaces later, at substitution, where the fallback is unreachable.
-     2. lightningcss with the §3.1 targets DELETES the fallback line outright as
-        an overridden duplicate — confirmed against the real minifier.
-   So the fallbacks below are inert in production exactly as specified. The
-   mechanism that does work is an @supports guard around the color-mix block.
-   That is not Wave 1b's call to make alone: the same defect governs §5.1's
-   --seal-size (Wave 2a), where the stated consequence is the headline running
-   under the seal, and any fix touches 1a's minifier path too. Left in the shape
-   §4.4 and §8.3 specify, and raised for Sarah in the Wave 1b report.
+   §4.4 now splits the two cases by blast radius, and only one of them is a
+   colour token:
+     - HERE, layer 3: no guard at all. color-mix() is inside Baseline 2023, so
+       every browser §3.1 claims support for has it, and degradation below the
+       floor is cosmetic — a missing hairline, not a broken page. A fallback
+       that cannot fire is worse than none, because the next person reads it as
+       a safety net.
+     - §5.1's --seal-size / --seal-clear: @supports (container-type: inline-size)
+       is REQUIRED, because there the collapse drops padding to 0 and runs the
+       headline under the seal. That guard lives in Wave 2a's envelope.css, not
+       here. Do not copy this file's no-guard shape over to it.
+
+   Whatever else changes, no colour LITERAL belongs in this file: §4.4's first
+   line puts colour in _data/palettes.js only, and a hand-written ink value is
+   both a second copy that drifts and, at 15% on a dark ground, an invisible
+   hairline. NOTE: §8.3's layer-3 example still shows the withdrawn pattern with
+   exactly that literal in it — it is stale, §4.4 governs, and the discrepancy
+   is flagged in the Wave 1b report.
    ------------------------------------------------------------------------- */
 :root {
   /* secondary text */
-  --t-muted: var(--t-ink);
   --t-muted: color-mix(in srgb, var(--t-ink) 72%, var(--t-bg));
 
   /* labels, captions */
-  --t-faint: var(--t-ink);
   --t-faint: color-mix(in srgb, var(--t-ink) 56%, var(--t-bg));
 
   /* hairline borders */
-  --t-line: var(--t-ink);
   --t-line: color-mix(in srgb, var(--t-ink) 15%, transparent);
 
   /* form outlines */
-  --t-rule: var(--t-ink);
   --t-rule: color-mix(in srgb, var(--t-ink) 40%, transparent);
 }
 
@@ -146,8 +142,8 @@
    tenth token" rule is about the --t-* contract, and none of these are colour,
    radius or face. Named here so no component hand-tunes a number.
 
-   clamp() sits well below the §3.1 floor (unlike color-mix and cqw), so these
-   need no static fallback.
+   clamp() sits well below the §3.1 floor, so nothing here is near the line that
+   §4.4's @supports ruling is about — that governs cqw in §5.1 only.
    ------------------------------------------------------------------------- */
 :root {
   --fs-xs: 0.8125rem;
