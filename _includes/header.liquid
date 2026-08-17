@@ -1,0 +1,32 @@
+{%- comment -%}
+  _includes/header.liquid — PRD §4.7.1. FROZEN after Wave 0 (AGENTS.md §5).
+
+  Hidden on Home — the guard lives in base.liquid, not here (§4.7.1, §5.1).
+
+  DOM order is the tab order (§4.6): wordmark -> nav links -> theme toggle.
+  The toggle sits OUTSIDE <nav> because it is a control, not wayfinding, but
+  after it, so the tab order still reads as §4.6 specifies.
+
+  Wave 2b overwrites _includes/theme-toggle.liquid. It must NEVER edit the
+  include line below (AGENTS.md §3, Wave 0 exception 1).
+{%- endcomment -%}
+{%- assign theme = themes[site.partyTheme] -%}
+<header class="site-header">
+  {%- comment -%}
+    Falls back to the site's own name, not party copy, so the home link always
+    has an accessible name. Liquid renders a missing key as an empty string
+    (§4.5), and an empty <a> is a focusable control with no name and no hit area.
+    Same fallback base.liquid uses for <title>.
+  {%- endcomment -%}
+  <a class="wordmark" href="/">{{ theme.wordmark | default: "A Shindig Thingamajig" }}</a>
+
+  <nav class="site-nav" aria-label="Main">
+    <ul class="nav-items">
+      {%- for item in nav %}
+      <li><a href="{{ item.url }}"{% if page.url == item.url %} aria-current="page"{% endif %}>{{ item.label }}</a></li>
+      {%- endfor %}
+    </ul>
+  </nav>
+
+  {% include "theme-toggle.liquid" %}
+</header>
