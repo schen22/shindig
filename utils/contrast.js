@@ -3,7 +3,7 @@
 // This module holds the ARITHMETIC only. The §4.3 pair table and its thresholds
 // live in tests/contrast.js, because they are the requirement; and the light/dark
 // token resolution (which palette key becomes --t-focus in which mode) lives in
-// utils/theme.js, because that is layer 2's job. Both are imported by the
+// utils/theme-css.js, because that is layer 2's job. Both are imported by the
 // checker rather than restated here — a second copy of either is exactly the
 // drift §4.4 exists to prevent.
 //

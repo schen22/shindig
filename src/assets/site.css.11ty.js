@@ -1,11 +1,11 @@
-// src/assets/site.11ty.js — ONE sheet, containing ONE palette (PRD §3.3, §4.4).
+// src/assets/site.css.11ty.js — ONE sheet, containing ONE palette (PRD §3.3, §4.4).
 //
 // The stylesheet is a build output, not a served file. public/ deliberately holds
 // no CSS: a passthrough copy plus a generated copy is exactly the duplication
 // §4.4 exists to prevent.
 //
 // Concatenation order is load-bearing:
-//   1. utils/theme.js  — layer 1 (registry) + layer 2 (the --t-* switch)
+//   1. utils/theme-css.js  — layer 1 (registry) + layer 2 (the --t-* switch)
 //   2. styles/tokens.css   — layer 3 derived surfaces + @font-face + globals (1b)
 //   3. styles/base.css, styles/layout.css                                   (1b)
 //   4. styles/components/*.css — GLOBBED and sorted, never enumerated
@@ -19,7 +19,7 @@ import { readFileSync, readdirSync, existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 import { transform } from "lightningcss";
-import { liveThemeCSS } from "../../utils/theme.js";
+import { liveThemeCSS } from "../../utils/theme-css.js";
 
 // Resolved from this file, NOT process.cwd() (AGENTS.md §6.4). §3.3's
 // readFileSync(`styles/${n}.css`) is correct only when the build runs from the

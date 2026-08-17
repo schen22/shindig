@@ -19,7 +19,7 @@
 //
 // `--t-body` and `--t-mono` are global, not per theme (§4.1); they live in
 // styles/tokens.css. `--t-focus` is NOT a palette key — it is primary in light
-// and accent in dark, resolved once in utils/theme.js so the generator and
+// and accent in dark, resolved once in utils/theme-css.js so the generator and
 // the contrast checker cannot disagree about it.
 //
 // ── Dark mode is authored, never derived (§4.2) ───────────────────────────────

@@ -31,7 +31,7 @@
 import { readFileSync, existsSync, readdirSync, statSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
-import { buildCSS } from "../src/assets/site.11ty.js";
+import { buildCSS } from "../src/assets/site.css.11ty.js";
 import site from "../_data/site.js";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");

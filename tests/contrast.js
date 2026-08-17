@@ -10,12 +10,12 @@
 // same module, two consumers.
 //
 // The pair table below is §4.3, restated nowhere else. The MATHS is in
-// utils/contrast.js and the light/dark focus mapping is in utils/theme.js, both
+// utils/contrast.js and the light/dark focus mapping is in utils/theme-css.js, both
 // imported rather than re-implemented.
 
 import palettes from "../_data/palettes.js";
 import { contrastRatio, floorTo } from "../utils/contrast.js";
-import { MODES, resolveTokens, assertPalette, focusKeyFor } from "../utils/theme.js";
+import { MODES, resolveTokens, assertPalette, focusKeyFor } from "../utils/theme-css.js";
 
 // §4.3, verbatim. "primary on bg" and "bg on primary" are separate rows because
 // they are separate design intents — a heading, and the seal label. The ratio is
@@ -32,7 +32,7 @@ const PAIRS = [
 ];
 
 // Not checked, by design: waxLit / waxDark. They are decorative surface and never
-// carry text (§4.4). Their presence is enforced by utils/theme.js's assertPalette,
+// carry text (§4.4). Their presence is enforced by utils/theme-css.js's assertPalette,
 // which this file calls for every theme — so a theme missing them still fails here
 // rather than rendering a flat circle in silence.
 

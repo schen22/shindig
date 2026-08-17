@@ -118,10 +118,10 @@ for (const page of PAGES) {
   }
 }
 
-// The generated stylesheet is a page of its own (src/assets/site.11ty.js) and its
+// The generated stylesheet is a page of its own (src/assets/site.css.11ty.js) and its
 // absence is invisible in the HTML: the <link> above still resolves to a 404.
 if (!existsSync(path.join(SITE, "assets", "site.css"))) {
-  failures.push("_site/assets/site.css: not emitted — src/assets/site.11ty.js did not run");
+  failures.push("_site/assets/site.css: not emitted — src/assets/site.css.11ty.js did not run");
 }
 
 console.log(`tests/build.js — ${PAGES.length} pages, frozen Wave 0 shell markers`);

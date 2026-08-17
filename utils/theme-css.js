@@ -1,4 +1,4 @@
-// utils/theme.js — _data/palettes.js → the live theme's CSS (PRD §4.4, §8.3).
+// utils/theme-css.js — _data/palettes.js → the live theme's CSS (PRD §4.4, §8.3).
 //
 // Layer 1 (registry, one palette, both modes) and layer 2 (the four-block --t-*
 // switch). Layer 3 — derived surfaces --t-muted/--t-faint/--t-line/--t-rule — is
@@ -120,7 +120,7 @@ export function liveThemeCSS(themeKey) {
   }
   assertPalette(themeKey, palette);
 
-  return `/* layer 1 · GENERATED from _data/palettes.js by utils/theme.js.
+  return `/* layer 1 · GENERATED from _data/palettes.js by utils/theme-css.js.
    Theme "${themeKey}" only — no other palette is in this bundle (§4.4).
    Do not hand-edit; edit _data/palettes.js. */
 :root {

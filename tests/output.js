@@ -18,9 +18,9 @@ import { fileURLToPath } from "node:url";
 import path from "node:path";
 import palettes from "../_data/palettes.js";
 import site from "../_data/site.js";
-import { MODES, COLOUR_KEYS } from "../utils/theme.js";
+import { MODES, COLOUR_KEYS } from "../utils/theme-css.js";
 import { normaliseHex } from "../utils/contrast.js";
-import { buildCSS } from "../src/assets/site.11ty.js";
+import { buildCSS } from "../src/assets/site.css.11ty.js";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const SITE = path.join(ROOT, "_site");
