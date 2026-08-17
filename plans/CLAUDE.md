@@ -64,7 +64,7 @@ This is a *decision*, not a description. It is what makes "does this need a fall
 │   ├── footer.liquid
 │   └── theme-toggle.liquid   # §4.7.3
 ├── _data/
-│   ├── site.js               # { partyTheme: "taskmaster", domain: "…" }  <- the one switch
+│   ├── site.js               # { partyTheme, domain }  <- the one switch (§6)
 │   ├── palettes.js           # ALL themes' colours. The only place colour exists (§4.4)
 │   ├── themes.js             # Per-theme copy (§4.5)
 │   └── nav.js                # The nav links. 11ty owns wayfinding, not the templates.
@@ -555,8 +555,8 @@ No API keys, no build-time fetch, no client-side fetch, no serverless functions.
 ```js
 // _data/site.js
 export default {
-  partyTheme: "taskmaster",     // <- the whole switch
-  domain: "…….netlify.app",     // absolute OG URLs break without it (§8.2)
+  partyTheme: "taskmaster",                // <- the whole switch
+  domain: "shindig-thingamajig.netlify.app", // absolute OG URLs break without it (§8.2)
 };
 ```
 
@@ -609,6 +609,8 @@ No auth, no password gate — it adds friction for friends without adding real s
 **`Referrer-Policy` closes a real hole in this specific model.** The secret here *is* the origin — the Netlify subdomain. Browsers send the origin on cross-origin navigations by default, so a friend clicking the footer link hands `taskmaster.tv` the address of the party site. Every outbound link leaks the one thing §7 Q3 is protecting. `no-referrer` stops it.
 
 **No CSP.** The Google Forms iframe would need `frame-src`, `script-src` and `style-src` allowances that Google changes without notice, turning a party invite into a maintenance burden the first time the form breaks silently. Deliberate omission, not an oversight.
+
+**The live address is `https://shindig-thingamajig.netlify.app`.** Worth being straight about what that name is doing: it is memorable and sayable, which is what you want for an address read aloud to friends — it is not obscure. It is the project's own name, so anyone who knows the project can guess it. That is a fine trade, but it means the three measures above are carrying the whole load, not backing up a secret URL.
 
 None of this is enforcement; a URL shared into a group chat is public to that chat. Say the address out loud rather than posting it anywhere indexable.
 
@@ -812,7 +814,7 @@ body {
 
 - **Real date, venue, and photo** — hand-written into `src/details.md` once dates are finalised, along with `details.ics` carrying the same date. Format is fixed at `Saturday, Sep 12 · 2pm PT` (§5.3). _Needs Sarah._
 - **Wordmark per theme** — theme 01 is "TM". 02–04 need their own. _Needs Sarah._
-- **Netlify site name** — determines the obscure URL and populates `site.domain`. _Needs Sarah._
+- ~~**Netlify site name**~~ — **resolved:** `shindig-thingamajig.netlify.app`. Set as `site.domain` in `_data/site.js` (§6); the OG tags in §8.2 now resolve.
 - **Theme toggle on Home** — specified as absent from `/`, since `/` now carries no chrome at all (§4.7.2). _Decided as absent; revisit if it bothers you._
 
 **Settled:** static `/details`, written as Markdown · one live party, no archive · anchor-first seal · seal floor 96px · second-visit `sessionStorage` flag, read inline (§5.1) · `robots.txt` + `noindex` + `_headers` (§7 Q3) · **two-state** light/dark toggle for the viewer, party palette chosen by Sarah pre-build (§4.7.3, §6) · one generated stylesheet carrying one palette (§4.4) · no CSP (§7 Q3) · no repo-side copy of the form's questions (§7 Q6).
@@ -828,7 +830,7 @@ body {
 - [ ] `public/assets/details.ics` carries the date written in `src/details.md`, including the time.
 - [ ] "Last updated" line on `/details` reflects today.
 - [ ] Venue, what to bring, plus-one policy are all filled in — no placeholder text.
-- [ ] `site.domain` is set and an OG preview resolves (paste the URL into a chat and look).
+- [ ] `site.domain` is `shindig-thingamajig.netlify.app` and the OG preview resolves — paste the URL into a chat and confirm the seal image and title appear, not a bare link.
 
 **The form**
 
