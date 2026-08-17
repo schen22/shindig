@@ -74,7 +74,6 @@ This is a *decision*, not a description. It is what makes "does this need a fall
 │       ├── envelope.css  toggle.css  callout.css  form-embed.css
 ├── public/                   # Passthrough-copied verbatim to the output
 │   └── assets/
-│       ├── fonts/            # Self-hosted (§4.8)
 │       ├── icons/  images/
 │       ├── js/
 │       │   ├── envelope.js   # §5.1 — seal, doors, second-visit flag
@@ -99,13 +98,21 @@ This is a *decision*, not a description. It is what makes "does this need a fall
 
 `public/` no longer contains stylesheets — CSS is generated, and having both a passthrough copy and a generated copy is exactly the kind of duplication §4.4 exists to prevent.
 
+**Nor does it contain fonts.** They are passthrough-copied out of `node_modules` by `eleventy.config.js` (§4.8) and appear only in the built output at `_site/assets/fonts/`. Same argument: a committed copy of a file npm already pins is a second copy that can drift, and choosing which file to copy is precisely where the `-full-` mistake in §4.8 happens.
+
 ### 3.3 Eleventy Configuration Requirements
 
 ```js
 // eleventy.config.js — Eleventy v3, ESM.
 export default function (eleventyConfig) {
   // Without this, nothing in public/ is emitted and every page renders unstyled.
-  eleventyConfig.addPassthroughCopy({ public: "assets" });
+  //
+  // The target is "/" — the output ROOT — NOT "assets". public/ already carries
+  // its own assets/ directory (§3.2), and robots.txt must land at /robots.txt to
+  // do anything (§7 Q3). Mapping public/ -> /assets emits /assets/robots.txt and
+  // /assets/assets/js/, and nothing fails: the site just becomes crawlable and
+  // the deferred scripts 404. Verified both ways at the Wave 0 boundary.
+  eleventyConfig.addPassthroughCopy({ public: "/" });
 
   // CSS lives outside the input dir, so Eleventy won't notice edits without this.
   eleventyConfig.addWatchTarget("./styles/");
@@ -188,6 +195,8 @@ Note the ordering: `test` runs the checks that can run **before** a build; `buil
 4. **`tests/build.js`** — asserts the three pages actually rendered, with expected markers present. Without it a build can "succeed" having emitted nothing, and every downstream check passes vacuously.
 
 5. **`tests/output.js`** — asserts exactly one palette in the built `site.css`, minified in production and readable in development, fonts present and preloaded.
+
+   **Plus a per-face byte ceiling of 50 KB.** The right Fraunces file is 35.8 KB and the wrong one — Fontsource's `-full-` variable-axis build — is 118.2 KB (§4.8). Both render correctly, so nothing but a size check distinguishes them, and the cost lands on the preloaded face. 50 KB clears all three real files with headroom and fails the `-full-` build outright.
 
 **Checks 3–5 exist because this project is built by several agents in parallel** (`AGENTS.md`). A rule that lives only in prose is a rule that holds until someone doesn't read that paragraph.
 
@@ -477,16 +486,34 @@ Target: **WCAG 2.2 level AA**. Everything on this site must be reachable and ope
 
 The three faces *are* the identity, and a silent fallback to Georgia and system-ui makes the site look like nothing while rendering "correctly". This must be specified, not assumed.
 
-- **Self-hosted**, `woff2`, in `public/assets/fonts/`. Not Google Fonts: a third-party render-blocking request sits badly against §1's privacy position and §4.0.6, and it is the only external dependency the page would otherwise have.
+- **Self-hosted**, `woff2`, served from `/assets/fonts/`. Not Google Fonts: a third-party render-blocking request sits badly against §1's privacy position and §4.0.6, and it is the only external dependency the page would otherwise have.
 - **Sourced as npm packages, not downloaded.**
 
   ```
-  @fontsource/fraunces   @fontsource/plus-jakarta-sans   @fontsource/courier-prime
+  @fontsource-variable/fraunces   @fontsource-variable/plus-jakarta-sans   @fontsource/courier-prime
   ```
 
-  The build copies the `woff2` files into `public/assets/fonts/`. Fetching from Google's CDN instead means guessing `gstatic` URLs behind a User-Agent-sensitive API — fragile, and it grants network access for a one-off task. Packages are version-pinned in the lockfile and produce the same self-hosted result.
+  **Fraunces and Plus Jakarta Sans are the `-variable` packages**; §8.3's `font-weight: 400 900` is a variable-font declaration and the static packages ship one file per fixed weight, which cannot satisfy it. Courier Prime has no variable build and stays static — it carries no weight range, so nothing is lost.
 
-- **Ship the full face, unsubsetted, for now.** Roughly 3× the bytes of a Latin subset. Subsetting needs `pyftsubset`/`glyphhanger`, which is a human step, so it is deferred rather than faked — revisit before launch (§11). Getting the faces *loading* is what matters; getting them small is an optimisation with a known method.
+  **The fonts are passthrough-copied from `node_modules` by `eleventy.config.js`, not committed to `public/`.** No binary lands in git, the lockfile is the version pin, and — the reason it is done this way — there is no filename for anyone to choose and therefore no wrong file to choose (see the `-full-` trap below). Fetching from Google's CDN instead means guessing `gstatic` URLs behind a User-Agent-sensitive API — fragile, and it grants network access for a one-off task.
+
+  ```js
+  // eleventy.config.js — output names are frozen against the §8.2 preload href.
+  eleventyConfig.addPassthroughCopy({
+    "node_modules/@fontsource-variable/fraunces/files/fraunces-latin-wght-normal.woff2":
+      "assets/fonts/fraunces.woff2",
+    "node_modules/@fontsource-variable/plus-jakarta-sans/files/plus-jakarta-sans-latin-wght-normal.woff2":
+      "assets/fonts/plus-jakarta-sans.woff2",
+    "node_modules/@fontsource/courier-prime/files/courier-prime-latin-400-normal.woff2":
+      "assets/fonts/courier-prime.woff2",
+  });
+  ```
+
+- **Ship the `latin` subset.** Fontsource publishes only per-character-subset files (`latin`, `latin-ext`, `vietnamese`, `cyrillic`) — there is no unsubsetted file to ship, so the choice is which subset rather than whether to subset. `latin` covers the site's copy. This retires the `pyftsubset`/`glyphhanger` human step: the subsetting is done upstream and version-pinned in the lockfile, so §11's deferred item is satisfied by construction rather than deferred to launch.
+
+  **The `-full-` trap.** Fontsource's `-full-` infix means the full *variable axis* set (`opsz`+`wght`+`soft`+`wonk`), not the full character set. `fraunces-latin-full-normal.woff2` is 118.2 KB against 35.8 KB for the weight axis alone — 3.3× the bytes, on the one face that is preloaded and render-blocking, for axes nothing here varies. The passthrough block above names the right file once so nobody re-derives it; `tests/output.js` enforces a per-face byte ceiling so the wrong one cannot ship unnoticed.
+
+  Correct payload: **80.7 KB** for all three faces (35.8 + 26.7 + 18.2).
 - **`font-display: swap`** on every `@font-face` — a flash of fallback text beats invisible text on a page whose first paint is the whole point.
 - **Preload the display face only** (`<link rel="preload" as="font" crossorigin>`). It sets the headline; body and mono can swap in.
 - The `@font-face` block lives in `styles/tokens.css` and is therefore part of the single generated sheet.
@@ -771,7 +798,7 @@ None of this is enforcement; a URL shared into a group chat is public to that ch
     <!-- One sheet, generated, containing one palette (§3.3, §4.4). -->
     <link rel="stylesheet" href="/assets/site.css">
     <link rel="preload" as="font" type="font/woff2" crossorigin
-          href="/assets/fonts/fraunces-subset.woff2">
+          href="/assets/fonts/fraunces.woff2">
 
     <link rel="icon" type="image/svg+xml" href="/assets/icons/favicon.svg">
     <!-- Split per feature (§3.2) so two authors never share one file. -->
@@ -839,7 +866,7 @@ Structure per §4.4 — generated registry, then switch, then derived surfaces.
 
 @font-face {
   font-family: "Fraunces";
-  src: url("/assets/fonts/fraunces-subset.woff2") format("woff2");
+  src: url("/assets/fonts/fraunces.woff2") format("woff2");
   font-display: swap;     /* §4.8 — flash of fallback beats invisible text */
   font-weight: 400 900;
 }
@@ -931,7 +958,7 @@ body {
 - [ ] Only the live theme's palette appears in the built `/assets/site.css`.
 - [ ] `robots.txt`, `noindex` meta and `_headers` are all live on the deployed site.
 - [ ] Netlify publishes `_site` from an empty base directory, production branch `main` (§3.5).
-- [ ] **Fonts subsetted to Latin** — deferred during the build (§4.8) and worth doing before the link goes out.
+- [x] ~~**Fonts subsetted to Latin**~~ — no longer a launch step. Fontsource ships the `latin` subset directly (§4.8), so this is satisfied by construction and pinned in the lockfile.
 
 **Behaviour**
 

@@ -104,7 +104,7 @@ One agent, no parallelism. Everything downstream imports from it, so splitting i
 | Agent                            | Owns                                                                                                                                                                                            | Exit condition                                                                                                                                                  |
 | :------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **1a · Colour pipeline & tests** | `_data/palettes.js`, `utils/theme-css.js`, `utils/contrast.js`, `src/assets/site.css.11ty.js`, and all of `tests/` — `contrast.js`, `copy.js`, `build.js`, `conformance.js`, `output.js` (§4.1) | Break a palette on purpose → `npm run build` exits non-zero. Restore → passes. Built `site.css` contains exactly one palette and zero `[data-party]` selectors. |
-| **1b · Type & base CSS**         | `styles/tokens.css`, `styles/base.css`, `styles/layout.css`, `public/assets/fonts/`                                                                                                             | Headline renders in Fraunces, not Georgia. Global `:focus-visible` rule present, matching §4.6.2 verbatim.                                                      |
+| **1b · Type & base CSS**         | `styles/tokens.css`, `styles/base.css`, `styles/layout.css`                                                                                                                                     | Headline renders in Fraunces, not Georgia. Global `:focus-visible` rule present, matching §4.6.2 verbatim.                                                      |
 
 **1a and 1b are genuinely parallel because §4.1's token contract is a written interface.** 1b writes `var(--t-primary)` without knowing or caring who defines it. That contract is what makes parallel CSS safe; do not weaken it by having any component define its own colour.
 
@@ -170,7 +170,7 @@ Most of what an audit agent would do is a grep with an exit code. Those belong i
 | Contrast, all four themes, both modes                                                                                                                                           | `tests/contrast.js`    |
 | Every theme defines every copy key                                                                                                                                              | `tests/copy.js`        |
 | No hard-coded hex outside `_data/palettes.js`; no `outline: none`; no positive `tabindex`; no `[data-party]` in output CSS; both copies of the §4.6.2 focus rule byte-identical | `tests/conformance.js` |
-| Exactly one palette in built `site.css`; minified in prod, readable in dev; fonts present and preloaded                                                                         | `tests/output.js`      |
+| Exactly one palette in built `site.css`; minified in prod, readable in dev; fonts present, preloaded, and **under 50 KB per face**                                              | `tests/output.js`      |
 
 Agents are reserved for what needs judgment: whether the tab order makes sense, whether the page is usable without scripts, whether the thing actually looks right.
 
@@ -277,7 +277,11 @@ These block or silently corrupt agent execution and are resolved before Wave 0 s
 
 2. **Three of the five test files do not exist, and they are the single most valuable addition for agent execution.** The PRD specifies only `contrast.js` and `copy.js`; `build.js`, `conformance.js` and `output.js` (§4.1) are new here. Without them an agent reports success and leaves the build broken for the next wave, and every mechanical audit has to be re-run by hand at each boundary instead of on every build. This is what turns an exit condition from a self-report into a check. → Wave 1a.
 
-3. ~~**Font files cannot be produced by an agent.**~~ **Resolved:** ship **full `woff2`, unsubsetted**, committed to `public/assets/fonts/` — Fraunces, Plus Jakarta Sans, Courier Prime. Roughly 3× the bytes of a Latin subset, which is acceptable for now and revisited before launch. §4.8's other requirements are unchanged: self-hosted, `font-display: swap`, preload the display face only. Subsetting needs `pyftsubset`/`glyphhanger`, so it stays a human step whenever it happens. → Wave 1b.
+3. ~~**Font files cannot be produced by an agent.**~~ ~~Ship full `woff2`, unsubsetted.~~ ~~Wave 1b copies them into `public/assets/fonts/`.~~ **Resolved (2026-08-17): ship the `latin` subset, passthrough-copied from `node_modules` by `eleventy.config.js`** — Fraunces, Plus Jakarta Sans, Courier Prime. Fontsource publishes **only** per-character-subset files (`latin`, `latin-ext`, `vietnamese`, `cyrillic`), so "unsubsetted" was never available from these packages and the choice is which subset, not whether. `latin` covers the site's copy. §4.8's other requirements are unchanged: self-hosted, `font-display: swap`, preload the display face only.
+
+   Two consequences. **The `pyftsubset`/`glyphhanger` human step is retired** — subsetting is done upstream, so §11's deferred "subset to Latin" item is satisfied by construction. And **no font is committed to the repo**: `public/assets/fonts/` leaves Wave 1b's ownership row entirely, because the copy is now a build step. **→ Wave 0** (it is `eleventy.config.js`, which freezes on merge), not Wave 1b. 1b still owns the `@font-face` blocks in `styles/tokens.css`.
+
+   The reason it moved: Fontsource's `-full-` infix names the full **variable axis** set (`opsz`+`wght`+`soft`+`wonk`), not the full character set. At 118.2 KB against 35.8 KB for `fraunces-latin-wght-normal.woff2`, picking it costs 3.3× on the preloaded, render-blocking face — and both files render correctly, so only a size check tells them apart. Naming the file once in a build rule removes the choice; `tests/output.js`'s 50 KB per-face ceiling (§4.1) catches it if it comes back.
 
 4. **`src/assets/site.css.11ty.js` reads `styles/${n}.css` relative to `process.cwd()`** (§3.3). Fine when Netlify runs from the repo root; breaks anywhere else. Resolve from the repo root explicitly.
 
@@ -328,11 +332,13 @@ The only credential in play is the SSH key behind `origin`, and §7.1 removes an
 
 Agents need the network for exactly one thing: `npm install`. There is no build-time fetch, no API, nothing to scrape.
 
-**Fonts are an npm dependency, not a download.** §4.8 needs three `woff2` files, and fetching them from Google's CDN means guessing `gstatic` URLs behind a User-Agent-sensitive API — fiddly, fragile, and a network permission granted for one task. Instead Wave 0 installs them as packages and Wave 1b copies the `woff2` files into `public/assets/fonts/`:
+**Fonts are an npm dependency, not a download.** §4.8 needs three `woff2` files, and fetching them from Google's CDN means guessing `gstatic` URLs behind a User-Agent-sensitive API — fiddly, fragile, and a network permission granted for one task. Instead Wave 0 installs them as packages **and passthrough-copies them from `node_modules` in `eleventy.config.js`** — no agent copies a font by hand at any point:
 
 ```
-@fontsource/fraunces  @fontsource/plus-jakarta-sans  @fontsource/courier-prime
+@fontsource-variable/fraunces  @fontsource-variable/plus-jakarta-sans  @fontsource/courier-prime
 ```
+
+Fraunces and Plus Jakarta Sans are the `-variable` builds; PRD §8.3's `font-weight: 400 900` is a variable-font declaration that the static packages cannot satisfy. Courier Prime has no variable build and carries no weight range, so it stays static.
 
 Same self-hosted result required by §4.8, no CDN request at runtime or build time, and version-pinned in the lockfile. `WebFetch` cannot retrieve binary font files anyway, so this is also the only approach that works.
 
