@@ -78,25 +78,33 @@ Three consequences worth stating plainly:
 - **Nothing an agent does can reach the live site.** That is the entire point of the split.
 - **`alpha` may be pushed by Claude** so Netlify can build a branch deploy for gate verification (headers, fonts, built CSS). That preview lives at a branch URL, is covered by `robots.txt` and the `noindex` meta, and is never the address given to anyone.
 
+**Merge as each agent passes, not all at once.** Waiting for the slowest agent means the first three sit unverified; merging on completion means a conflict — if ownership somehow slipped — surfaces against one small diff instead of four.
+
+**When an agent cannot finish:** merge the agents that did pass, report exactly what is missing, and **do not declare the wave done**. Holding three clean worktrees hostage to one failure helps nobody, but a gate that passes with a feature missing is worse — it makes the next wave build on a gap nobody is tracking.
+
 ### Wave 0 — Scaffold (solo, blocking)
 
 One agent, no parallelism. Everything downstream imports from it, so splitting it is negative value.
 
-**Owns:** `package.json`, `.nvmrc`, `.gitignore`, `eleventy.config.js`, `_data/site.js`, `_data/nav.js`, `_includes/base.liquid`, `_includes/header.liquid`, `_includes/footer.liquid`, `_includes/theme-toggle.liquid` _(placeholder only)_, and stub `src/index.liquid`, `src/rsvp.liquid`, `src/details.md`.
+**Owns the entire config layer:** `package.json`, `.nvmrc`, `.gitignore`, `eleventy.config.js`, `netlify.toml`, `_headers`, `public/robots.txt`, `_data/site.js`, `_data/nav.js`, `_includes/base.liquid`, `_includes/header.liquid`, `_includes/footer.liquid`, `_includes/theme-toggle.liquid` _(placeholder — see below)_, and stub `src/index.liquid`, `src/rsvp.liquid`, `src/details.md`.
 
 **This job is larger than `eleventy init`.** `base.liquid` must ship complete — every include slot, the full §8.2 inline script, the skip link, the `{% unless page.url == "/" %}` guards — so that no later agent ever reopens the shell. Wave 0 writes slots for features that do not exist yet.
 
-`_includes/theme-toggle.liquid` ships as a placeholder because `header.liquid` includes it and a missing include fails the build. Wave 2b overwrites the file; it never edits the include line.
+**Wave 0 installs every dependency the project will ever need** — realistically just `lightningcss` — because `package.json` becomes frozen the moment this wave merges (§5). It is the most conflict-prone file in any JS project and the one file several agents would otherwise all want to touch. An agent that later finds a dependency missing **reports it**; it does not add it.
 
-**Exit:** `npx eleventy --serve` renders three pages, unstyled. Nav shows correct `aria-current`. Header and footer are both absent on `/`.
+**Two named exceptions to "no file appears twice" (§1).** Both are deliberate, and naming them here is what keeps the rule credible:
 
-### Wave 1 — Foundation (3 parallel)
+1. `_includes/theme-toggle.liquid` — Wave 0 ships a placeholder because `header.liquid` includes it and a missing include fails the build. **Wave 2b overwrites the file; it never edits the include line.**
+2. `src/index.liquid`, `src/rsvp.liquid`, `src/details.md` — Wave 0 ships stubs so the build has three pages; Wave 2 replaces their contents. Same pattern: the shell is Wave 0's, the content is Wave 2's.
+
+**Exit:** `npx eleventy --serve` renders three pages, unstyled. Nav shows correct `aria-current`. Header and footer are both absent on `/`. `netlify.toml`, `_headers` and `robots.txt` are present and valid — the *live* header check belongs to the launch checklist, since it needs a real deploy.
+
+### Wave 1 — Foundation (2 parallel)
 
 | Agent                            | Owns                                                                                                                                                                                            | Exit condition                                                                                                                                                  |
 | :------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **1a · Colour pipeline & tests** | `_data/palettes.js`, `utils/theme-css.js`, `utils/contrast.js`, `src/assets/site.css.11ty.js`, and all of `tests/` — `contrast.js`, `copy.js`, `build.js`, `conformance.js`, `output.js` (§4.1) | Break a palette on purpose → `npm run build` exits non-zero. Restore → passes. Built `site.css` contains exactly one palette and zero `[data-party]` selectors. |
 | **1b · Type & base CSS**         | `styles/tokens.css`, `styles/base.css`, `styles/layout.css`, `public/assets/fonts/`                                                                                                             | Headline renders in Fraunces, not Georgia. Global `:focus-visible` rule present, matching §4.6.2 verbatim.                                                      |
-| **1c · Netlify & access**        | `netlify.toml`, `_headers`, `public/robots.txt`                                                                                                                                                 | Deploy preview serves all three headers; `robots.txt` resolves at site root.                                                                                    |
 
 **1a and 1b are genuinely parallel because §4.1's token contract is a written interface.** 1b writes `var(--t-primary)` without knowing or caring who defines it. That contract is what makes parallel CSS safe; do not weaken it by having any component define its own colour.
 
@@ -113,12 +121,12 @@ One agent, no parallelism. Everything downstream imports from it, so splitting i
 
 Every path above is owned by exactly one agent. No file appears twice. Merging these four worktrees cannot conflict.
 
-Recurring failure modes worth naming, all of them already specified and all of them easy to get wrong:
+Each of these has a clause in the PRD that is easy to read past and expensive to get wrong. **Read the pointer, not a summary of it** — restating spec here is how two documents start to disagree:
 
-- **2a:** static fallbacks before every `cqw` (§4.4) — without them the seal clearance collapses to zero and text runs under the seal. The spin plays on opening only; a reset must suppress transitions for a frame.
-- **2b:** each glyph is bound to a state, never `display: none`, and the palette flips on the same frame as the click — the outgoing icon animates _after_ the theme has already changed.
-- **2c:** the direct form link is always visible, not an error state.
-- **2d:** every key in the §4.5 copy contract is defined for **all four** themes, not just Taskmaster. `tests/copy.js` enforces this; a missing key renders as empty string and Liquid says nothing.
+- **2a** → §4.4's fallback rule and §5.1's seal clearance. The failure is silent and total.
+- **2b** → §4.7.3 on state-bound glyphs and repaint ordering.
+- **2c** → §5.2 on the always-visible fallback link.
+- **2d** → §4.5's copy contract, for **all four** themes, not just Taskmaster.
 
 ### Wave 3 — Real values (not a code task, and blocks nothing)
 
@@ -194,7 +202,9 @@ So: push the cheap, local, high-volume review left to per-agent, and shrink the 
 
 #### 4.3.1 Per-agent review (every agent, before merge)
 
-Every agent's work is reviewed **in its own worktree, before it merges**. One reviewer, not a panel — this is a code review, not a symposium.
+Every agent's work is reviewed **in its own worktree, before it merges**. This is a code review, not a symposium.
+
+**One reviewer per wave, not one per agent.** It takes each agent's diff in turn as that agent finishes. Same coverage as four separate reviewers, one spawn instead of four, and it sees every diff in the wave — which is the only way to notice two agents solving the same problem two different ways.
 
 **Scope is deliberately narrow:**
 
@@ -248,6 +258,8 @@ After Wave 0 merges, **nobody edits these** — not even the agent that wrote th
 - `_includes/header.liquid`, `_includes/footer.liquid`
 - `eleventy.config.js`
 - `_data/site.js`, `_data/nav.js`
+- **`package.json`** — Wave 0 installs everything up front (§3, Wave 0). It is the file several agents would otherwise all want to edit and the one git resolves worst. Need a dependency? Report it; do not add it.
+- `netlify.toml`, `_headers`, `public/robots.txt` — access control (PRD §7 Q3). Changing these changes who can find the site, which is not a decision that belongs inside a feature agent.
 
 Single-writer for a different reason:
 
@@ -261,7 +273,7 @@ Need one changed? Stop, report, and let it be done between waves.
 
 These block or silently corrupt agent execution and are resolved before Wave 0 starts.
 
-1. **`netlify.toml` is unspecified in the PRD.** Needs publish directory (`_site`), build command (`npm run build`), and `NODE_ENV=production`. The last one matters: §3.3 gates minification on it, so getting it wrong ships unminified CSS and nothing complains. → Wave 1c.
+1. **`netlify.toml` is unspecified in the PRD.** Needs publish directory (`_site`), build command (`npm run build`), `NODE_ENV=production`, and **production branch `main`** so `alpha` never deploys to the live URL (§3.0). The `NODE_ENV` line matters: §3.3 gates minification on it, so getting it wrong ships unminified CSS and nothing complains. → Wave 0.
 
 2. **Three of the five test files do not exist, and they are the single most valuable addition for agent execution.** The PRD specifies only `contrast.js` and `copy.js`; `build.js`, `conformance.js` and `output.js` (§4.1) are new here. Without them an agent reports success and leaves the build broken for the next wave, and every mechanical audit has to be re-run by hand at each boundary instead of on every build. This is what turns an exit condition from a self-report into a check. → Wave 1a.
 
@@ -275,7 +287,53 @@ These block or silently corrupt agent execution and are resolved before Wave 0 s
 
 ---
 
-## 7. Rules for every agent
+## 7. Permissions and tooling
+
+### 7.1 The one hard boundary
+
+**`git push` is denied to every agent.** Netlify deploys `main` on push, so a push is the only action in this project that can reach real people. Everything else an agent can do is recoverable by `git checkout`.
+
+Put it in `.claude/settings.local.json` rather than relying on instructions — a deny rule holds even when an agent has convinced itself it needs to push:
+
+```jsonc
+{
+  "permissions": {
+    "deny": [
+      "Bash(git push:*)",
+      "Bash(git remote:*)"
+    ],
+    "allow": [
+      "Bash(npm install:*)", "Bash(npm run:*)", "Bash(npm test:*)", "Bash(npx eleventy:*)",
+      "Bash(git add:*)", "Bash(git commit:*)", "Bash(git status:*)",
+      "Bash(git diff:*)", "Bash(git log:*)", "Bash(git checkout -b:*)", "Bash(git worktree:*)"
+    ]
+  }
+}
+```
+
+The allow list is not about safety, it is about prompt fatigue: an agent that stops for approval on every `npm run build` will produce a session of clicking rather than a build.
+
+### 7.2 There are no secrets, and that is a design property
+
+No API keys, no tokens, no environment variables, no `.env`. The PRD's privacy position (§1) means the build fetches nothing and the site holds no credentials — so **no agent ever needs access to one**, and any agent that asks for a secret has misunderstood the task.
+
+The only credential in play is the SSH key behind `origin`, and §7.1 removes any reason to touch it.
+
+### 7.3 Network access
+
+Agents need the network for exactly one thing: `npm install`. There is no build-time fetch, no API, nothing to scrape.
+
+**Fonts are an npm dependency, not a download.** §4.8 needs three `woff2` files, and fetching them from Google's CDN means guessing `gstatic` URLs behind a User-Agent-sensitive API — fiddly, fragile, and a network permission granted for one task. Instead Wave 0 installs them as packages and Wave 1b copies the `woff2` files into `public/assets/fonts/`:
+
+```
+@fontsource/fraunces  @fontsource/plus-jakarta-sans  @fontsource/courier-prime
+```
+
+Same self-hosted result required by §4.8, no CDN request at runtime or build time, and version-pinned in the lockfile. `WebFetch` cannot retrieve binary font files anyway, so this is also the only approach that works.
+
+---
+
+## 8. Rules for every agent
 
 1. Read `plans/CLAUDE.md` before writing anything. It is the requirements; this file is only the division of labour.
 2. Write **only** the paths listed in your row. Read anything.
@@ -287,7 +345,7 @@ These block or silently corrupt agent execution and are resolved before Wave 0 s
 
 ---
 
-## 8. Honest sizing
+## 9. Honest sizing
 
 This is three pages of static HTML. Wave 2's parallelism saves perhaps twenty minutes, and the coordination overhead is a real fraction of that.
 

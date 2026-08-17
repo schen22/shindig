@@ -2,7 +2,7 @@
 
 **Project:** A Shindig Thingamajig
 **Current theme:** Taskmaster (theme 01)
-**Version:** 1.2.0
+**Version:** 1.3.0
 **Status:** Draft / Ready to scaffold
 **Author:** Sarah Chen
 
@@ -69,12 +69,16 @@ This is a *decision*, not a description. It is what makes "does this need a fall
 │   ├── themes.js             # Per-theme copy (§4.5)
 │   └── nav.js                # The nav links. 11ty owns wayfinding, not the templates.
 ├── styles/                   # CSS source partials — NOT served directly (§4.4)
-│   ├── tokens.css  base.css  layout.css  components.css
+│   ├── tokens.css  base.css  layout.css
+│   └── components/           # Globbed, never a single components.css
+│       ├── envelope.css  toggle.css  callout.css  form-embed.css
 ├── public/                   # Passthrough-copied verbatim to the output
 │   └── assets/
 │       ├── fonts/            # Self-hosted (§4.8)
 │       ├── icons/  images/
-│       ├── js/site.js
+│       ├── js/
+│       │   ├── envelope.js   # §5.1 — seal, doors, second-visit flag
+│       │   └── theme.js      # §4.7.3 — the toggle's write path
 │       └── details.ics       # §5.3
 ├── src/                      # Source pages
 │   ├── index.liquid
@@ -86,9 +90,12 @@ This is a *decision*, not a description. It is what makes "does this need a fall
 │   ├── theme-css.js          # palettes.js -> the live theme's CSS block
 │   └── contrast.js           # WCAG ratio maths, shared by tests/
 ├── _headers                  # §7 Q3
+├── netlify.toml              # §3.5
 ├── eleventy.config.js
 └── package.json
 ```
+
+**Two directories are globbed, not enumerated, and this is load-bearing** — see `AGENTS.md` §2. `styles/components/` and `public/assets/js/` are each written by several different authors; a single `components.css` or `site.js` is a file they would all have to edit at once. A globbed directory means adding a component never touches a shared file.
 
 `public/` no longer contains stylesheets — CSS is generated, and having both a passthrough copy and a generated copy is exactly the kind of duplication §4.4 exists to prevent.
 
@@ -122,7 +129,7 @@ import { readFileSync } from "node:fs";
 import { transform } from "lightningcss";
 import { liveThemeCSS } from "../../utils/theme-css.js";
 
-const PARTIALS = ["tokens", "base", "layout", "components"];
+const PARTIALS = ["tokens", "base", "layout"];   // then styles/components/*.css, globbed & sorted
 const read = (n) => readFileSync(`styles/${n}.css`, "utf8");
 
 export default class {
@@ -159,11 +166,16 @@ export default [
 
 ```json
 "scripts": {
-  "start": "NODE_ENV=development eleventy --serve",
-  "test":  "node tests/contrast.js && node tests/copy.js",
-  "build": "npm test && NODE_ENV=production eleventy"
+  "start":         "NODE_ENV=development eleventy --serve",
+  "test":          "node tests/contrast.js && node tests/copy.js && node tests/conformance.js",
+  "build":         "npm test && NODE_ENV=production eleventy && node tests/build.js && node tests/output.js",
+  "build:netlify": "npm run build"
 }
 ```
+
+`build:netlify` is the command configured in the Netlify UI. It exists as an alias so the deploy pipeline has a stable name even if the local build script changes shape.
+
+Note the ordering: `test` runs the checks that can run **before** a build; `build.js` and `output.js` inspect the emitted site and therefore run after.
 
 1. **`tests/contrast.js`** — imports `_data/palettes.js` and computes every pair in §4.3, for **every theme, in both modes**. Exits non-zero on any failure.
 
@@ -171,7 +183,40 @@ export default [
 
 2. **`tests/copy.js`** — asserts every theme in `_data/themes.js` defines every key in the §4.5 contract. A missing key is not an error in Liquid; it renders as empty string, so a theme ships with no footer line and nothing complains.
 
-### 3.5 Definition of Done
+3. **`tests/conformance.js`** — the rules in this document that are mechanically checkable, enforced rather than remembered: no hard-coded hex outside `_data/palettes.js`; no `outline: none`; no positive `tabindex`; no `[data-party]` selector reaching the output CSS; both copies of the §4.6.2 focus rule byte-identical.
+
+4. **`tests/build.js`** — asserts the three pages actually rendered, with expected markers present. Without it a build can "succeed" having emitted nothing, and every downstream check passes vacuously.
+
+5. **`tests/output.js`** — asserts exactly one palette in the built `site.css`, minified in production and readable in development, fonts present and preloaded.
+
+**Checks 3–5 exist because this project is built by several agents in parallel** (`AGENTS.md`). A rule that lives only in prose is a rule that holds until someone doesn't read that paragraph.
+
+### 3.5 Netlify Configuration
+
+Committed as `netlify.toml` so the deploy config is in the repo and diffable, rather than living only in a UI:
+
+```toml
+[build]
+  command = "npm run build:netlify"
+  publish = "_site"
+
+[build.environment]
+  NODE_ENV = "production"
+  NODE_VERSION = "20"
+
+[context.production]
+  # main is the only branch that reaches the live URL.
+```
+
+Three settings are easy to get wrong and each fails differently:
+
+- **Publish is `_site`, not `public/`.** Eleventy emits to `_site`; `public/` is the *source* passthrough folder. Publishing `public/` serves the fonts, CSS and JS with **no HTML at all** — no pages, no index.
+- **Base directory stays empty** (the repo root, where `package.json` is). A non-root base makes Netlify look for `package.json` — and for this `netlify.toml` — somewhere it isn't.
+- **Production branch is `main`.** `alpha` is the integration branch (`AGENTS.md` §3.0) and must never deploy to the live URL.
+
+No environment variables beyond the two above. The site holds no secrets by design (§1), so there is nothing else to configure and nothing to leak.
+
+### 3.6 Definition of Done
 
 `npm run build` passing is necessary, not sufficient. See the launch checklist in §11.
 
@@ -388,7 +433,7 @@ Target: **WCAG 2.2 level AA**. Everything on this site must be reachable and ope
    - **The palette repaints on the same frame as the state change**, so the theme has already turned over while the outgoing glyph is still spinning away. The icon's exit trails the change; it never gates it.
 
    ```js
-   // public/assets/js/site.js — the write half
+   // public/assets/js/theme.js — the write half
    function resolvedMode() {
      return document.documentElement.dataset.theme
        || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
@@ -433,7 +478,15 @@ Target: **WCAG 2.2 level AA**. Everything on this site must be reachable and ope
 The three faces *are* the identity, and a silent fallback to Georgia and system-ui makes the site look like nothing while rendering "correctly". This must be specified, not assumed.
 
 - **Self-hosted**, `woff2`, in `public/assets/fonts/`. Not Google Fonts: a third-party render-blocking request sits badly against §1's privacy position and §4.0.6, and it is the only external dependency the page would otherwise have.
-- **Subset to Latin** and, for variable faces, to the weights actually used.
+- **Sourced as npm packages, not downloaded.**
+
+  ```
+  @fontsource/fraunces   @fontsource/plus-jakarta-sans   @fontsource/courier-prime
+  ```
+
+  The build copies the `woff2` files into `public/assets/fonts/`. Fetching from Google's CDN instead means guessing `gstatic` URLs behind a User-Agent-sensitive API — fragile, and it grants network access for a one-off task. Packages are version-pinned in the lockfile and produce the same self-hosted result.
+
+- **Ship the full face, unsubsetted, for now.** Roughly 3× the bytes of a Latin subset. Subsetting needs `pyftsubset`/`glyphhanger`, which is a human step, so it is deferred rather than faked — revisit before launch (§11). Getting the faces *loading* is what matters; getting them small is an optimisation with a known method.
 - **`font-display: swap`** on every `@font-face` — a flash of fallback text beats invisible text on a page whose first paint is the whole point.
 - **Preload the display face only** (`<link rel="preload" as="font" crossorigin>`). It sets the headline; body and mono can swap in.
 - The `@font-face` block lives in `styles/tokens.css` and is therefore part of the single generated sheet.
@@ -530,6 +583,35 @@ The three faces *are* the identity, and a silent fallback to Georgia and system-
 - **Calendar file.** `/assets/details.ics`, hand-written alongside the copy, linked as "Add to calendar", plus a Google Calendar template link for people who won't download a file. A static `.ics` is a text file — no service, no cost, no build step — and it is the single highest-value thing an event page can offer.
 
   The `.ics` carries the same date as the page. It is a second copy, so it is on the §11 checklist.
+
+  **Exact contents.** RFC 5545, minimal — no `RRULE`, no `ATTENDEE`, no `VALARM`. Someone else's calendar is not the place to be clever:
+
+  ```text
+  BEGIN:VCALENDAR
+  VERSION:2.0
+  PRODID:-//A Shindig Thingamajig//EN
+  CALSCALE:GREGORIAN
+  BEGIN:VEVENT
+  UID:shindig-2026-09-05@shindig-thingamajig.netlify.app
+  DTSTAMP:20260816T000000Z
+  DTSTART:20260905T210000Z
+  DTEND:20260906T010000Z
+  SUMMARY:A Shindig Thingamajig
+  DESCRIPTION:Hang out with Sarah and friends. Details: https://shindig-thingamajig.netlify.app/details/
+  LOCATION:TBC — address in the group chat
+  URL:https://shindig-thingamajig.netlify.app/details/
+  END:VEVENT
+  END:VCALENDAR
+  ```
+
+  Four things that are easy to get wrong, in the order they will bite:
+
+  1. **Times are UTC with a trailing `Z`, converted by hand.** `2pm PT` on Sep 5 2026 is inside daylight saving, so Pacific is UTC−7 and 2pm becomes `210000Z`. This is the PST/PDT trap from §5.3's date format, wearing a different hat — get it wrong and the invite lands in everyone's calendar an hour out. **Using UTC deliberately avoids needing a `VTIMEZONE` block**, which is the other way to do this and requires far more to be correct.
+  2. **`DTEND` is required.** Omit it and clients guess — some assume 30 minutes, some assume all day. Four hours is the assumed default here; change it with the date.
+  3. **Line endings must be CRLF.** RFC 5545 requires it and some clients reject LF-only files outright. A file that opens fine on a Mac and fails silently on Outlook is exactly the bug nobody finds before the party.
+  4. **`UID` must change if the event moves.** Reusing a `UID` makes calendars treat the new file as an *update* to the old event, which is right for a reschedule and wrong for a different party.
+
+  Served as `text/calendar` — Netlify infers this from the extension; if a client ever downloads it as `.txt`, add the type to `_headers`.
 
 - **"Last updated" line**, hand-set, at the foot of the content. The site deliberately cannot know whether it agrees with the Google Form (§6), so the honest move is to tell a reader how old what they're looking at is, and let them judge. Cheap, and it is the only defence against silently stale details.
 
@@ -692,7 +774,9 @@ None of this is enforcement; a URL shared into a group chat is public to that ch
           href="/assets/fonts/fraunces-subset.woff2">
 
     <link rel="icon" type="image/svg+xml" href="/assets/icons/favicon.svg">
-    <script src="/assets/js/site.js" defer></script>
+    <!-- Split per feature (§3.2) so two authors never share one file. -->
+    <script src="/assets/js/envelope.js" defer></script>
+    <script src="/assets/js/theme.js" defer></script>
   </head>
   <body>
     {% unless page.url == "/" %}
@@ -828,6 +912,7 @@ body {
 **Correctness — the things nothing can check automatically**
 
 - [ ] `public/assets/details.ics` carries the date written in `src/details.md`, including the time.
+- [ ] **Add the `.ics` to a real calendar and read the time back.** The UTC conversion is by hand (§5.3); an hour's error is invisible in the file and obvious to every guest.
 - [ ] "Last updated" line on `/details` reflects today.
 - [ ] Venue, what to bring, plus-one policy are all filled in — no placeholder text.
 - [ ] `site.domain` is `shindig-thingamajig.netlify.app` and the OG preview resolves — paste the URL into a chat and confirm the seal image and title appear, not a bare link.
@@ -845,6 +930,8 @@ body {
 - [ ] `npm run build` passes, including `tests/contrast.js` across all four themes.
 - [ ] Only the live theme's palette appears in the built `/assets/site.css`.
 - [ ] `robots.txt`, `noindex` meta and `_headers` are all live on the deployed site.
+- [ ] Netlify publishes `_site` from an empty base directory, production branch `main` (§3.5).
+- [ ] **Fonts subsetted to Latin** — deferred during the build (§4.8) and worth doing before the link goes out.
 
 **Behaviour**
 
