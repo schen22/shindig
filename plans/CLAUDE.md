@@ -303,14 +303,20 @@ Two failures were caught this way and are already fixed above: Taskmaster's orig
 // _data/palettes.js — the single source of colour.
 export default {
   taskmaster: {
-    light: { bg: "#faf6f0", ink: "#2b2625", primary: "#8b1e1e", accent: "#d4a359", card: "#ffffff" },
-    dark:  { bg: "#221b1a", ink: "#f2e9de", primary: "#de7a72", accent: "#e0b673", card: "#2e2624" },
+    light: { bg: "#faf6f0", ink: "#2b2625", primary: "#8b1e1e", accent: "#d4a359", card: "#ffffff",
+             waxLit: "#b33a32", waxDark: "#6b1414" },
+    dark:  { bg: "#221b1a", ink: "#f2e9de", primary: "#de7a72", accent: "#e0b673", card: "#2e2624",
+             waxLit: "#e89a92", waxDark: "#a34f48" },
     radius: "2px",
     display: '"Fraunces", Georgia, serif',
   },
   forest: { /* … */ },
 };
 ```
+
+**`waxLit` and `waxDark` are the seal's two wax shades**, and they are palette keys rather than derived tokens because they cannot be mechanically derived. The seal's `radial-gradient` runs lit → `primary` → shadowed, and a `color-mix()` of `primary` with white desaturates toward pink rather than toward the warmer, oranger red that reads as wax. Every theme defines both, in both modes. `tests/contrast.js` does not check them — they are decorative surface, never text — but `tests/copy.js`'s sibling logic applies: a theme missing them renders a flat circle and nothing complains.
+
+The **label on the seal is `--t-bg`**, not a new key. §4.3 already requires `bg` on `primary` to clear 4.5, which is precisely the seal-label pair, so the contrast is checked and the token contract does not grow.
 
 **Layer 1 — registry, generated, one theme only.** `utils/theme-css.js` emits the selected palette straight onto `:root`. Both modes side by side, which is the only way to review a theme's two modes together:
 

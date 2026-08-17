@@ -55,7 +55,12 @@
     <link rel="preload" as="font" type="font/woff2" crossorigin
           href="/assets/fonts/fraunces.woff2">
 
+    <!-- Safari renders no SVG favicon on desktop or iOS, so the PNG is not
+         belt-and-braces — it is the only icon Safari will ever show. Both are
+         the same wax seal; see tools/make-og-assets.py. -->
     <link rel="icon" type="image/svg+xml" href="/assets/icons/favicon.svg">
+    <link rel="icon" type="image/png" sizes="180x180" href="/assets/icons/favicon-180.png">
+    <link rel="apple-touch-icon" href="/assets/icons/favicon-180.png">
     <!-- Split per feature (§3.2) so two authors never share one file. -->
     <script src="/assets/js/envelope.js" defer></script>
     <script src="/assets/js/theme.js" defer></script>
