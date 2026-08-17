@@ -55,9 +55,11 @@ body {
    theme change re-sets every heading without touching this file.
 
    text-wrap: balance sits ABOVE the §3.1 floor and is deliberately a lone
-   progressive-enhancement declaration — unsupported it is dropped on its own
-   and nothing downstream depends on it, so the §4.4 fallback rule does not
-   apply. It matters most on the §5.1 headline, which wraps at every width. */
+   progressive-enhancement declaration on a normal property, not a custom one:
+   where it is unsupported it is dropped on its own, no var() substitution can
+   collapse behind it, and nothing downstream depends on it — so it needs none of
+   the guarding §4.4 requires for §5.1's cqw. It matters most on the §5.1
+   headline, which wraps at every width. */
 h1,
 h2,
 h3,
