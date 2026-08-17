@@ -11,10 +11,12 @@
 //     cannot import _data/palettes.js, so layer 1 has to be generated.
 //   · tests/contrast.js imports the SAME module. A checker that re-types the
 //     hexes is a copy, and copies drift (§4.4).
-//   · light-dark() would not replace layer 2: it is Baseline 2024 (Chrome 123,
-//     Safari 17.5, Firefox 120), below §3.1's Baseline 2023 floor, so §4.4's
-//     fallback rule would require these four blocks underneath it anyway. It also
-//     keys off color-scheme, while the viewer's choice is data-theme (§4.7.3).
+//   · light-dark() cannot replace layer 2. It is Baseline 2024 (Chrome 123,
+//     Safari 17.5, Firefox 120), below §3.1's Baseline 2023 floor — and a browser
+//     at the floor does not degrade, it drops the whole declaration and every
+//     var() downstream collapses with it. It also keys off color-scheme, while the
+//     viewer's choice is data-theme (§4.7.3). Rejected on review; these four
+//     blocks are the mechanism, not a fallback beneath a newer one.
 
 import palettes from "../_data/palettes.js";
 import { parseHex } from "./contrast.js";

@@ -22,9 +22,11 @@
 //   · utils/ and _data/ — utils/*.js interpolate palette values without
 //     containing any, and _data/palettes.js IS the source.
 //
-// Check 1 is scoped to `#` literals only. §4.4 REQUIRES rgba() fallbacks ahead of
-// every color-mix() in styles/tokens.css, so a rule that flagged "any literal
-// colour" would fail Wave 1b's correct code.
+// Check 1 is scoped to `#` literals only, deliberately. Functional notations —
+// rgba(), color-mix(), oklch() — are how layer 3's derived surfaces are written in
+// styles/tokens.css, and a rule that flagged "any literal colour" would fail Wave
+// 1b's correct code. What §4.4 forbids is a SECOND SOURCE of colour, and a hex
+// literal is the form that takes.
 
 import { readFileSync, existsSync, readdirSync, statSync } from "node:fs";
 import { fileURLToPath } from "node:url";
