@@ -247,7 +247,7 @@ The design system is a **fixed token contract** plus a **registry of themes** th
 
 ### 4.1 Token Contract
 
-Every theme defines exactly these. A theme that needs a tenth token is a signal that the *component* needs changing, not the theme.
+Every theme defines exactly these. A theme that needs a **twelfth** token is a signal that the *component* needs changing, not the theme.
 
 | Token | Role |
 | :--- | :--- |
@@ -256,12 +256,18 @@ Every theme defines exactly these. A theme that needs a tenth token is a signal 
 | `--t-primary` | Headings, links, seal, active nav underline, anything that must read as the theme |
 | `--t-accent` | **Decorative only** — rings, dot outlines, tints. Never carries text. |
 | `--t-card` | Raised surfaces (callout card, form container) |
+| `--t-wax-lit` | **Decorative only** — the seal's lit gradient stop. Never carries text. |
+| `--t-wax-dark` | **Decorative only** — the seal's shadowed gradient stop. Never carries text. |
 | `--t-radius` | Corner language (2px sharp → 14px soft) |
 | `--t-focus` | Focus ring. Primary in light modes, accent in dark. Never inherits from accent blindly. |
 | `--t-display` | Display / heading face |
 | `--t-mono` | Instructional face — task numbers, labels, deadlines |
 
 `--t-body` is global, not per-theme.
+
+**On the two wax tokens (added 2026-08-17).** They are palette keys, authored per mode, because they cannot be derived: the seal's gradient runs lit → `primary` → shadowed, and a `color-mix()` of `primary` with white desaturates toward pink rather than the warmer red that reads as wax (§4.4). They raise the contract from nine to eleven, which is a deliberate amendment rather than the drift this section warns about — the count is the guardrail, not the number nine. `utils/theme-css.js` enforces the closed set: a palette with an unexpected key fails the build, so the contract cannot grow again by accident.
+
+Being decorative-only is load-bearing, not descriptive. Neither wax token is contrast-checked, for the same reason `--t-accent` is not: the moment one carries text, §4.3 has an unmeasured pair in it.
 
 ### 4.2 Theme Registry
 
@@ -350,13 +356,23 @@ The **label on the seal is `--t-bg`**, not a new key. §4.3 already requires `bg
 **Layer 3 — derived surfaces.** Components must never carry raw percentages. Name them once:
 
 ```css
---t-muted: color-mix(in srgb, var(--t-ink) 72%, var(--t-bg));  /* secondary text  */
---t-faint: color-mix(in srgb, var(--t-ink) 56%, var(--t-bg));  /* labels, captions */
---t-line:  color-mix(in srgb, var(--t-ink) 15%, transparent);  /* hairline borders */
---t-rule:  color-mix(in srgb, var(--t-ink) 40%, transparent);  /* form outlines    */
+--t-muted: color-mix(in srgb, var(--t-ink) 72%, var(--t-bg));  /* ALL secondary text */
+--t-faint: color-mix(in srgb, var(--t-ink) 56%, var(--t-bg));  /* DECORATIVE ONLY    */
+--t-line:  color-mix(in srgb, var(--t-ink) 15%, transparent);  /* hairline borders   */
+--t-rule:  color-mix(in srgb, var(--t-ink) 40%, transparent);  /* form outlines      */
 ```
 
 Thirteen ad-hoc `color-mix` values had accumulated across components, with 70%, 72% and 78% all meaning "muted text". Four tokens replaced fifteen call sites.
+
+**`--t-faint` is decorative only and never carries text (resolved 2026-08-17).** It was originally "labels, captions", and that was a WCAG AA failure hiding in the token layer. Measured with `utils/contrast.js` against every theme's light mode, 56% ink on bg gives:
+
+| taskmaster | forest | birthday | picnic | AA needs |
+| :--- | :--- | :--- | :--- | :--- |
+| 3.54 | 3.50 | 3.64 | 3.65 | **4.5** |
+
+All four fail; the dark modes pass at 5.26–5.50, which is exactly why looking at it in one mode found nothing. **Any text that would have taken `--t-faint` takes `--t-muted`**, which clears 4.5 in all eight combinations with headroom (5.61–8.40). Raising `--t-faint` to 65% was the alternative and was rejected: it clears AA only by 0.03 in forest, and it collapses the gap between two tokens that exist to be visibly different.
+
+This is the third contrast failure in this project's history and, like the first two, nothing but arithmetic would have caught it — §4.3's pair table lists palette colours, and a *derived* value never enters it. So the rule now has a check behind it: **`tests/contrast.js` measures the layer-3 text tokens, not just the §4.3 pairs.** `--t-faint`, `--t-line` and `--t-rule` are exempt as decorative, and the exemption is the reason the check can trust them.
 
 #### The fallback rule (applies to every modern feature, not just colour)
 
