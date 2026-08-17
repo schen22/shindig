@@ -64,11 +64,11 @@ A wave is not done when its agents report done. It is done when the gate for tha
 
 Netlify deploys `main` on push (PRD §3.1). An agent pushing mid-wave puts a half-built site on the live URL friends have been given, so the safety property here is absolute rather than a matter of care:
 
-| Branch | Who writes it | What it is |
-| :--- | :--- | :--- |
-| `main` | **Sarah only** | What Netlify deploys. Receives from `alpha`, when Sarah decides. |
-| `alpha` | Claude merges into it | The integration branch. Every wave lands here. Created by Sarah or Claude, never by an agent. |
-| `waveN/<agent>` | one agent each | A worktree branch, e.g. `wave2/2a`. Deleted after merge. |
+| Branch          | Who writes it         | What it is                                                                                    |
+| :-------------- | :-------------------- | :-------------------------------------------------------------------------------------------- |
+| `main`          | **Sarah only**        | What Netlify deploys. Receives from `alpha`, when Sarah decides.                              |
+| `alpha`         | Claude merges into it | The integration branch. Every wave lands here. Created by Sarah or Claude, never by an agent. |
+| `waveN/<agent>` | one agent each        | A worktree branch, e.g. `wave2/2a`. Deleted after merge.                                      |
 
 **The flow:** agents branch from `alpha` → work in their own worktree → **commit** → pass per-agent review (§4.3.1) → Claude merges to `alpha` → the wave gate runs on `alpha` → Sarah merges `alpha` to `main` when she wants it live.
 
@@ -97,7 +97,7 @@ One agent, no parallelism. Everything downstream imports from it, so splitting i
 1. `_includes/theme-toggle.liquid` — Wave 0 ships a placeholder because `header.liquid` includes it and a missing include fails the build. **Wave 2b overwrites the file; it never edits the include line.**
 2. `src/index.liquid`, `src/rsvp.liquid`, `src/details.md` — Wave 0 ships stubs so the build has three pages; Wave 2 replaces their contents. Same pattern: the shell is Wave 0's, the content is Wave 2's.
 
-**Exit:** `npx eleventy --serve` renders three pages, unstyled. Nav shows correct `aria-current`. Header and footer are both absent on `/`. `netlify.toml`, `_headers` and `robots.txt` are present and valid — the *live* header check belongs to the launch checklist, since it needs a real deploy.
+**Exit:** `npx eleventy --serve` renders three pages, unstyled. Nav shows correct `aria-current`. Header and footer are both absent on `/`. `netlify.toml`, `_headers` and `robots.txt` are present and valid — the _live_ header check belongs to the launch checklist, since it needs a real deploy.
 
 ### Wave 1 — Foundation (2 parallel)
 
@@ -176,13 +176,13 @@ Agents are reserved for what needs judgment: whether the tab order makes sense, 
 
 ### 4.2 The gates
 
-| Boundary          | Automated                                                 | Agent review                                                                                                                                                                                                                     |
-| :---------------- | :-------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Every agent, pre-merge** | its own `npm run build`                          | **Per-agent review (§4.3.1)** — diff against spec, ownership respected, exit condition actually met. Nothing merges until this passes.                                                                                            |
-| **After Wave 0**  | `build.js`                                                | **Keyboard & a11y on the bare shell.** Most of §4.6 is Wave 0's work and is fully verifiable here — skip link first, tab order, `aria-current`, header/footer guards on `/`. Do not wait for CSS.                                |
-| **After Wave 1**  | `+ contrast.js`, `copy.js`, `conformance.js`, `output.js` | **Type & colour spot check** — fonts loading, focus ring visible and contrast-checked in both modes. **Plus expert panel review (§4.3).**                                                                                        |
-| **After Wave 2**  | full suite                                                | **Keyboard & a11y, round two** (nothing invisible focusable, `inert` behind the closed doors, the toggle's label naming the action) and **no-JS** (seal navigates, toggle absent not broken, OS dark preference still honoured). **Plus expert panel review (§4.3).** |
-| **Before launch** | full suite                                                | Re-run both agents, then walk §11 of the PRD.                                                                                                                                                                                    |
+| Boundary                   | Automated                                                 | Agent review                                                                                                                                                                                                                                                          |
+| :------------------------- | :-------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Every agent, pre-merge** | its own `npm run build`                                   | **Per-agent review (§4.3.1)** — diff against spec, ownership respected, exit condition actually met. Nothing merges until this passes.                                                                                                                                |
+| **After Wave 0**           | `build.js`                                                | **Keyboard & a11y on the bare shell.** Most of §4.6 is Wave 0's work and is fully verifiable here — skip link first, tab order, `aria-current`, header/footer guards on `/`. Do not wait for CSS.                                                                     |
+| **After Wave 1**           | `+ contrast.js`, `copy.js`, `conformance.js`, `output.js` | **Type & colour spot check** — fonts loading, focus ring visible and contrast-checked in both modes. **Plus expert panel review (§4.3).**                                                                                                                             |
+| **After Wave 2**           | full suite                                                | **Keyboard & a11y, round two** (nothing invisible focusable, `inert` behind the closed doors, the toggle's label naming the action) and **no-JS** (seal navigates, toggle absent not broken, OS dark preference still honoured). **Plus expert panel review (§4.3).** |
+| **Before launch**          | full suite                                                | Re-run both agents, then walk §11 of the PRD.                                                                                                                                                                                                                         |
 
 The Wave 0 gate is the one most worth not skipping. It is the cheapest audit in the project and it is the only point where fixing the shell costs nothing.
 
@@ -190,11 +190,11 @@ The Wave 0 gate is the one most worth not skipping. It is the cheapest audit in 
 
 Per-agent review and panel review are **not alternatives**. They catch different classes of defect, and neither one substitutes for the other:
 
-| Layer | Runs | Scope | Catches |
-| :--- | :--- | :--- | :--- |
-| **Tests** (§4.1) | Every build, every agent | Whole repo, mechanical | Regressions, the moment they appear |
-| **Per-agent review** (§4.3.1) | Every agent, before its merge | That agent's diff | Local defects — missing fallback, wrong ARIA, spec deviation |
-| **Expert panel** (§4.3.2) | Once per wave, after merge | The integrated result | What only exists once the parts are together |
+| Layer                         | Runs                          | Scope                  | Catches                                                      |
+| :---------------------------- | :---------------------------- | :--------------------- | :----------------------------------------------------------- |
+| **Tests** (§4.1)              | Every build, every agent      | Whole repo, mechanical | Regressions, the moment they appear                          |
+| **Per-agent review** (§4.3.1) | Every agent, before its merge | That agent's diff      | Local defects — missing fallback, wrong ARIA, spec deviation |
+| **Expert panel** (§4.3.2)     | Once per wave, after merge    | The integrated result  | What only exists once the parts are together                 |
 
 The distinction that matters: **a per-agent reviewer cannot see the defects that this project has actually suffered from.** A seal with no working link when JavaScript is off, a toggle rendered as a dead control, seal sizing coupled to its own gap, a motion signature that disagrees with itself across two components — none of those are visible in one file's diff. They only appear when you ask whether the whole thing holds together. Conversely, a wave-boundary panel is a slow, expensive way to catch a missing `cqw` fallback that a reviewer would have flagged in seconds, before the merge even happened.
 
@@ -219,7 +219,7 @@ A merge only happens after this passes. **A dirty worktree never reaches the int
 
 #### 4.3.2 Expert panel (Waves 1 and 2, after merge)
 
-Waves 1 and 2 do not close on tests passing. Each runs the **`expert-review-panel` skill** on the integrated result, iterating until the average is **≥ 90/100**, and findings must be *fixed*, not merely filed.
+Waves 1 and 2 do not close on tests passing. Each runs the **`expert-review-panel` skill** on the integrated result, iterating until the average is **≥ 90/100**, and findings must be _fixed_, not merely filed.
 
 Tests catch what someone thought to check for. The panel is for what nobody thought to check — and on this project it has a track record: two WCAG contrast failures, the no-JS seal, the dead toggle, the seal-hierarchy regression, four keyboard bugs. No test and no diff review would have caught any of them.
 
@@ -227,10 +227,10 @@ Tests catch what someone thought to check for. The panel is for what nobody thou
 
 **Composition.** Run the lenses that have something to bite on. Ten experts on a three-page static site produces padding, and padding is what makes a review get skipped next time.
 
-| Wave | Lenses | What they are judging |
-| :--- | :--- | :--- |
-| **1 · Foundation** | Software Architect · Code Quality · Maintainability · Performance · Reliability · Security | A build pipeline, a token contract, hosting config. Duplication, the single-source-of-colour claim, whether a bad palette really does fail the build, whether adding theme 05 touches only `_data/`. |
-| **2 · Features** | UX · Accessibility · Code Quality · Performance · Reliability · Domain (event invites) · Software Architect | Everything a visitor touches. Hierarchy, motion, focus behaviour, the no-JS path, and whether the page does the job a party invite exists to do. |
+| Wave               | Lenses                                                                                                      | What they are judging                                                                                                                                                                                |
+| :----------------- | :---------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **1 · Foundation** | Software Architect · Code Quality · Maintainability · Performance · Reliability · Security                  | A build pipeline, a token contract, hosting config. Duplication, the single-source-of-colour claim, whether a bad palette really does fail the build, whether adding theme 05 touches only `_data/`. |
+| **2 · Features**   | UX · Accessibility · Code Quality · Performance · Reliability · Domain (event invites) · Software Architect | Everything a visitor touches. Hierarchy, motion, focus behaviour, the no-JS path, and whether the page does the job a party invite exists to do.                                                     |
 
 Accessibility is a standing lens on both, not a sub-point of UX. It is the requirement this project has failed most often.
 
@@ -298,16 +298,21 @@ Put it in `.claude/settings.local.json` rather than relying on instructions — 
 ```jsonc
 {
   "permissions": {
-    "deny": [
-      "Bash(git push:*)",
-      "Bash(git remote:*)"
-    ],
+    "deny": ["Bash(git push:*)", "Bash(git remote:*)"],
     "allow": [
-      "Bash(npm install:*)", "Bash(npm run:*)", "Bash(npm test:*)", "Bash(npx eleventy:*)",
-      "Bash(git add:*)", "Bash(git commit:*)", "Bash(git status:*)",
-      "Bash(git diff:*)", "Bash(git log:*)", "Bash(git checkout -b:*)", "Bash(git worktree:*)"
-    ]
-  }
+      "Bash(npm install:*)",
+      "Bash(npm run:*)",
+      "Bash(npm test:*)",
+      "Bash(npx eleventy:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git checkout -b:*)",
+      "Bash(git worktree:*)",
+    ],
+  },
 }
 ```
 
