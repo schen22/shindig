@@ -340,6 +340,21 @@ Agents need the network for exactly one thing: `npm install`. There is no build-
 
 Fraunces and Plus Jakarta Sans are the `-variable` builds; PRD §8.3's `font-weight: 400 900` is a variable-font declaration that the static packages cannot satisfy. Courier Prime has no variable build and carries no weight range, so it stays static.
 
+### 7.4 Which model each role runs on
+
+**Default: Sonnet.** Builder agents are spawned with an explicit `model: "sonnet"` rather than inheriting the orchestrator's. There is no project `.claude/agents/` directory — the agent types come from the user's global definitions — so the per-spawn override is the project-scoped lever, and it has to be passed every time or the agent silently inherits the more expensive model.
+
+| Role | Model | Why |
+| :--- | :--- | :--- |
+| Wave 2 feature agents (2a–2d) | **Sonnet** | Implementation against a token contract that now exists and is machine-checked. The expensive thinking already happened in Waves 0 and 1. |
+| Wave 3 content | **Sonnet** | Prose and an `.ics` file. |
+| Per-agent reviewer (§4.3.1) | **Opus** | Its job is catching what the builder was confident about. A reviewer that shares the builder's blind spots is a rubber stamp with a budget. |
+| Expert panel (§4.3.2) | **Opus** | Same argument, and its track record is defects no test was written for — the `--t-faint` AA failure was found by arithmetic nobody had thought to run. |
+
+**The asymmetry is the point.** A builder's mistakes are caught downstream by tests, by review, and by the gate; a reviewer's mistakes are caught by nothing. Spend the budget where a miss is unrecoverable, not where it is checked three ways.
+
+**Cost is a real constraint here and this is a real saving** — Wave 2 is four parallel agents on the largest file count in the project. But if a Sonnet builder starts producing spec deviations the reviewer has to catch repeatedly, the saving has moved to the reviewer rather than disappeared, and the split should be revisited rather than defended.
+
 Same self-hosted result required by §4.8, no CDN request at runtime or build time, and version-pinned in the lockfile. `WebFetch` cannot retrieve binary font files anyway, so this is also the only approach that works.
 
 ---
