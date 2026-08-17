@@ -360,17 +360,38 @@ Thirteen ad-hoc `color-mix` values had accumulated across components, with 70%, 
 
 #### The fallback rule (applies to every modern feature, not just colour)
 
-**Any custom property whose value uses a feature at the §3.1 support floor must be preceded by a static fallback declaration.** An unsupported unit or function makes the *whole declaration* invalid at computed-value time — the property is not "ignored", it resolves to its initial value, and everything downstream that references it collapses too.
+~~**Any custom property whose value uses a feature at the §3.1 support floor must be preceded by a static fallback declaration.**~~
+
+**Withdrawn (2026-08-17). The two-declaration fallback does not work for custom properties, and was verified not to.** Two independent failures stack:
+
+1. **A custom property's value is an arbitrary token stream.** `--t-line: color-mix(…)` therefore *parses* and wins the cascade even where `color-mix` is unsupported, so the preceding fallback declaration is unreachable. The failure surfaces later, at `var()` substitution, as invalid-at-computed-value-time — which is the collapse this rule was written to prevent, arriving anyway.
+2. **`lightningcss` deletes the fallback.** Minified against the §3.1 targets, the two-declaration pair emits as `--t-line:color-mix(…)` and `--seal-size:clamp(6rem, 19cqw, 7.5rem)`. In production the fallback is not merely inert; it is absent.
+
+`@supports` is the mechanism that actually works, because it gates on support before the declaration exists.
+
+**Resolved: split by blast radius, because the two cases are not alike.**
+
+| Case | Ruling |
+| :--- | :--- |
+| **Layer-3 colour tokens** (`--t-muted`, `--t-faint`, `--t-line`, `--t-rule`) | **No fallback, no `@supports`.** Write the `color-mix()` declaration alone. `color-mix()` is inside Baseline 2023, so every browser §3.1 claims to support has it, and the degradation below the floor is cosmetic — a missing hairline, not a broken page. A fallback that cannot fire is worse than none: it reads as a safety net and is not one. |
+| **`--seal-size` / `--seal-clear`** (§5.1) | **`@supports` required.** Here the failure is not cosmetic. An unsupported `cqw` invalidates `--seal-size`, which invalidates the `calc()` for `--seal-clear`, which drops `padding` to `0` — and the headline runs underneath the seal, the one outcome §5.1 forbids. Set the static floors unconditionally, then raise them inside `@supports (container-type: inline-size)`. |
 
 ```css
---t-line: rgba(43, 38, 37, 0.15);                              /* fallback first */
+/* Layer 3 — the modern declaration, alone. */
 --t-line: color-mix(in srgb, var(--t-ink) 15%, transparent);
 
---seal-size: 6rem;                                             /* fallback first */
---seal-size: clamp(6rem, 19cqw, 7.5rem);
+/* §5.1 seal — static floor, then the container-query upgrade. */
+.envelope { --seal-size: 6rem; --seal-gap: 1rem; }
+@supports (container-type: inline-size) {
+  .envelope {
+    container-type: inline-size;
+    --seal-size: clamp(6rem, 19cqw, 7.5rem);
+    --seal-gap: clamp(1rem, 4cqw, 1.75rem);
+  }
+}
 ```
 
-This rule was originally written about `color-mix` alone, and the gap was real: **the seal clearance in §5.1 is built entirely on `cqw`.** Without a fallback, an unsupported `cqw` invalidates `--seal-size`, which invalidates the `calc()` for `--seal-clear`, which drops `padding` to `0` — and the headline runs underneath the seal, the one outcome §5.1 forbids. The failure is not degraded styling; it is the layout the spec exists to prevent.
+`--seal-clear` stays derived — `calc(var(--seal-size) / 2 + var(--seal-gap))` — and is computed once, outside the guard, so it follows whichever pair won.
 
 ### 4.5 Themed Copy
 
@@ -857,10 +878,11 @@ Structure per §4.4 — generated registry, then switch, then derived surfaces.
 :root[data-theme="dark"]  { /* the --d-* set, as above */ }
 :root[data-theme="light"] { /* the --l-* set, as above */ }
 
-/* ── layer 3 · derived surfaces. Static fallback first, per §4.4: without it a
-      browser lacking color-mix drops the declaration and loses the border. ── */
+/* ── layer 3 · derived surfaces. One declaration, no fallback line: §4.4's
+      two-declaration pattern is withdrawn — it never fired, and lightningcss
+      strips it. Do NOT copy this no-guard shape over to --seal-size, which
+      takes @supports instead; see §4.4's split. ── */
 :root {
-  --t-line: rgba(43, 38, 37, 0.15);
   --t-line: color-mix(in srgb, var(--t-ink) 15%, transparent);
 }
 
