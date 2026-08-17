@@ -1,0 +1,85 @@
+{%- comment -%}
+  _includes/base.liquid — PRD §8.2. FROZEN after Wave 0 merges (AGENTS.md §5).
+  Nobody edits this file, including its author. It ships complete: every include
+  slot, the full inline head script, the skip link, and the "/" chrome guards.
+
+  Two deliberate deviations from the §8.2 code block, both reported at the Wave 0
+  boundary:
+    1. The skip link comes BEFORE the header include. §8.2 puts the header first,
+       which contradicts §4.6.1 ("first focusable element") and the §4.6 tab
+       order. §4.6 is normative; §8.2 is a reference note.
+    2. <title> resolves themed page titles via `titleKey` (§4.5 lists page titles
+       as themed copy). A literal `title` in front matter still wins, so §8.2's
+       shape is preserved.
+{%- endcomment -%}
+{%- assign theme = themes[site.partyTheme] -%}
+<!doctype html>
+<html lang="en" data-party="{{ site.partyTheme }}">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{{ title | default: theme[titleKey] | default: "A Shindig Thingamajig" }}</title>
+    <meta name="author" content="Sarah Chen">
+    <meta name="description" content="Organise and host a hangout with friends">
+    <meta name="robots" content="noindex, nofollow">
+
+    <meta property="og:title" content="A Shindig Thingamajig">
+    <meta property="og:description" content="Organise and host a hangout with friends">
+    <!-- OG URLs must be absolute or link previews break. site.domain is defined
+         in _data/site.js — without it these render as https:/// and fail silently. -->
+    <meta property="og:image" content="https://{{ site.domain }}/assets/images/seal.png">
+    <meta property="og:image:alt" content="A Shindig Thingamajig wax seal">
+    <meta property="og:url" content="https://{{ site.domain }}{{ page.url }}">
+    <meta property="og:site_name" content="A Shindig Thingamajig">
+
+    <!-- Inline and before the stylesheet, or dark-mode users see a parchment flash.
+         Three jobs, all of which must happen before first paint:
+           1. the js class, which gates the theme toggle (§4.7.3)
+           2. the viewer's light/dark choice (§4.7.3)
+           3. the second-visit envelope flag (§5.1) — read here, not in the
+              deferred bundle, or / paints closed and then snaps open. -->
+    <script>
+      var d = document.documentElement;
+      d.classList.add("js");
+      var t = localStorage.getItem("theme");
+      if (t) d.dataset.theme = t;
+      if (sessionStorage.getItem("envelopeOpened")) d.classList.add("envelope-open");
+    </script>
+
+    <!-- One sheet, generated, containing one palette (§3.3, §4.4). -->
+    <link rel="stylesheet" href="/assets/site.css">
+    <!-- Display face only (§4.8); body and mono can swap in. This filename is
+         frozen together with the font passthrough rule in eleventy.config.js —
+         changing either alone breaks the preload silently. -->
+    <link rel="preload" as="font" type="font/woff2" crossorigin
+          href="/assets/fonts/fraunces.woff2">
+
+    <!-- Safari renders no SVG favicon on desktop or iOS, so the PNG is not
+         belt-and-braces — it is the only icon Safari will ever show. Both are
+         the same wax seal; see tools/make-og-assets.py. -->
+    <link rel="icon" type="image/svg+xml" href="/assets/icons/favicon.svg">
+    <link rel="icon" type="image/png" sizes="180x180" href="/assets/icons/favicon-180.png">
+    <link rel="apple-touch-icon" href="/assets/icons/favicon-180.png">
+    <!-- Split per feature (§3.2) so two authors never share one file. -->
+    <script src="/assets/js/envelope.js" defer></script>
+    <script src="/assets/js/theme.js" defer></script>
+  </head>
+  <body>
+    {%- comment -%}
+      Skip link is FIRST in the DOM — §4.6.1, and the Wave 0 gate checks it.
+      Visually hidden until focused; styling belongs to Wave 1b (styles/base.css).
+    {%- endcomment -%}
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    {% unless page.url == "/" %}
+      {% include "header.liquid" %}
+    {% endunless %}
+
+    <main id="main" class="main-content" tabindex="-1">{{ content }}</main>
+
+    {% unless page.url == "/" %}
+      {% include "footer.liquid" %}
+    {% endunless %}
+  </body>
+</html>

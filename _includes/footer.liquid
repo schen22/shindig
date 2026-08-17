@@ -1,0 +1,26 @@
+{%- comment -%}
+  _includes/footer.liquid — PRD §4.7.2. FROZEN after Wave 0 (AGENTS.md §5).
+
+  Hidden on Home — the guard lives in base.liquid (§4.7.2, §5.1). A footer is
+  chrome, and §4.7.3's argument for keeping the toggle off "/" cannot hold while
+  a footer sits under the envelope.
+
+  Copy is theme-supplied (§4.5). rel="noreferrer" reinforces §7 Q3's
+  Referrer-Policy at the element level: the header only applies on Netlify, and
+  the secret this project protects IS the origin.
+
+  The link is GUARDED on footerLinkUrl. Liquid renders a missing key as an empty
+  string (§4.5), and href="" resolves to the CURRENT page — which would ship a
+  focusable, unnamed link that navigates to itself. tests/copy.js (Wave 1a)
+  should catch a missing key at build time; this guard is what keeps the failure
+  from reaching a visitor if it ever doesn't.
+{%- endcomment -%}
+{%- assign theme = themes[site.partyTheme] -%}
+<footer class="site-footer">
+  <p class="footer-line">
+    {{ theme.footerLine }}
+    {%- if theme.footerLinkUrl %}
+    <a href="{{ theme.footerLinkUrl }}" rel="noreferrer">{{ theme.footerLinkText }}</a>
+    {%- endif %}
+  </p>
+</footer>

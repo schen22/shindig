@@ -1,0 +1,19 @@
+{%- comment -%}
+  _includes/theme-toggle.liquid — PLACEHOLDER.
+
+  Wave 0 ships this file only so header.liquid's include resolves; a missing
+  include fails the build. Wave 2b OVERWRITES this file per PRD §4.7.3 and must
+  not touch the include line in header.liquid (AGENTS.md §3, Wave 0 exception 1).
+
+  It deliberately renders NOTHING. §4.7.3 is explicit that a toggle with no
+  working write path must be absent rather than dead — "rendering a control that
+  cannot do anything is worse than omitting it" — and public/assets/js/theme.js
+  does not exist until Wave 2b. The Wave 0 a11y gate also checks that nothing
+  invisible is focusable, which an inert placeholder button would fail.
+
+  Wave 2b's replacement needs, per §4.7.3:
+    - a single two-state icon <button>, sun bound to light, crescent to dark
+    - both glyphs in the DOM, stacked and absolutely positioned, never display:none
+    - decorative SVG aria-hidden="true"; aria-label names the ACTION, not the state
+    - hidden entirely without the `js` class set by the §8.2 inline script
+{%- endcomment -%}
