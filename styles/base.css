@@ -1,0 +1,227 @@
+/* ============================================================================
+   styles/base.css — Wave 1b. PRD §4.6, §4.8, §8.3.
+
+   Element-level defaults, typography, the skip link, the one global focus rule,
+   and the global reduced-motion honour. No colour is defined here: every value
+   is a var() against the §4.1 token contract (layers 1 and 2 are generated —
+   see tokens.css). No layout lives here either; that is layout.css.
+   ============================================================================ */
+
+/* ── Reset, kept to what this site actually needs ──────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* Native widgets, scrollbars and form controls should agree with the palette.
+   Three declarations, mirroring layer 2's three cases (§4.4): the bare :root
+   follows the OS, and the viewer's explicit choice wins over it both ways. The
+   media query is not redundant — it is what keeps dark mode working with
+   JavaScript off (§4.4, §4.0.4). */
+:root {
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+}
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--t-bg);
+  color: var(--t-ink);
+  font-family: var(--t-body);
+  font-size: var(--fs-md);
+  line-height: var(--lh-body);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* ── Typography ─────────────────────────────────────────────────────────────
+   Display for voice, mono for instruction (§4.0.3). Headings carry --t-primary
+   per §4.1; --t-display is the theme's face and arrives from layer 1, so a
+   theme change re-sets every heading without touching this file.
+
+   text-wrap: balance sits ABOVE the §3.1 floor and is deliberately a lone
+   progressive-enhancement declaration — unsupported it is dropped on its own
+   and nothing downstream depends on it, so the §4.4 fallback rule does not
+   apply. It matters most on the §5.1 headline, which wraps at every width. */
+h1,
+h2,
+h3,
+h4 {
+  margin: 0 0 var(--space-md);
+  font-family: var(--t-display);
+  color: var(--t-primary);
+  line-height: var(--lh-heading);
+  text-wrap: balance;
+}
+
+h1 {
+  font-size: var(--fs-h1);
+  font-weight: 800;
+  line-height: var(--lh-tight);
+  letter-spacing: -0.01em;
+}
+
+h2 {
+  font-size: var(--fs-h2);
+  font-weight: 700;
+}
+
+h3 {
+  font-size: var(--fs-h3);
+  font-weight: 600;
+}
+
+h4 {
+  font-size: var(--fs-lg);
+  font-weight: 600;
+}
+
+p,
+ul,
+ol,
+dl,
+figure,
+blockquote {
+  margin: 0 0 var(--space-md);
+  max-width: var(--measure);
+}
+
+/* Anything that sounds like a rule is set in the mono face (§4.0.3, §4.1). */
+code,
+kbd,
+samp,
+pre,
+time {
+  font-family: var(--t-mono);
+  font-size: 0.95em;
+}
+
+strong,
+b {
+  font-weight: 700;
+}
+
+small {
+  font-size: var(--fs-sm);
+  color: var(--t-faint);
+}
+
+a {
+  color: var(--t-primary);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+}
+
+hr {
+  height: 0;
+  margin: var(--space-lg) 0;
+  border: 0;
+  border-top: 1px solid var(--t-line);
+}
+
+img,
+picture,
+svg,
+video {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+/* ── Skip link — §4.6.1 ─────────────────────────────────────────────────────
+   base.liquid ships <a class="skip-link" href="#main"> first in the DOM and
+   leaves the styling here by name. Visually hidden until focused, and hidden by
+   clipping rather than by display/visibility — the latter would take it out of
+   the tab order, which is the one thing it must never leave.
+
+   Absolutely positioned in both states so it never occupies a row in the body's
+   flex column (layout.css) and never shifts the page when it appears. */
+.skip-link {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip-link:focus {
+  position: fixed;
+  z-index: 100;
+  top: var(--space-xs);
+  left: var(--space-xs);
+  width: auto;
+  height: auto;
+  margin: 0;
+  padding: var(--space-xs) var(--space-md);
+  overflow: visible;
+  clip-path: none;
+  background: var(--t-card);
+  color: var(--t-primary);
+  border: 2px solid var(--t-primary);
+  border-radius: var(--t-radius);
+  font-family: var(--t-mono);
+  font-size: var(--fs-sm);
+  text-decoration: none;
+}
+
+/* ── Focus — §4.6.2 ─────────────────────────────────────────────────────────
+   ONE global focus style, not per-component rules: per-component focus only
+   ever covers what someone remembered to style. --t-focus is contrast-checked
+   in both modes by tests/contrast.js (§4.3).
+
+   The selector list below is verbatim from §4.6.2 and tests/conformance.js
+   diffs the two copies byte for byte. Do not reformat it, do not extend it, and
+   never suppress an outline anywhere in this project without an equivalent
+   replacement — tests/conformance.js greps for that too, so this comment
+   deliberately does not spell the declaration out. */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 3px solid var(--t-focus);
+  outline-offset: 3px;
+}
+
+/* #main carries tabindex="-1" so the skip link can land on it, which means it
+   matches the rule above. That is intended — it shows a keyboard user where
+   focus went — and it is why there is no outline suppression here. §4.6.6:
+   scroll targets keep clearance in case a sticky element ever covers them. */
+[id] {
+  scroll-margin-top: var(--space-lg);
+}
+
+/* ── Motion — §4.6, §5.1 ────────────────────────────────────────────────────
+   Honoured globally, in one place, rather than remembered per component: the
+   envelope (2a) and the toggle (2b) both animate and neither has to repeat this.
+
+   Durations collapse to 0.01ms rather than 0 on purpose — transitionend and
+   animationend still fire, so a component that sequences on them (§5.1's seal
+   hands off to location.assign) keeps working. Navigation still happens; only
+   the motion goes. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0s !important;
+    scroll-behavior: auto !important;
+  }
+}
