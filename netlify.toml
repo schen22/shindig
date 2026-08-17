@@ -1,0 +1,18 @@
+# Deploy config lives in the repo so it is diffable, not only in a UI (PRD §3.5).
+# Base directory stays empty (the repo root, where package.json is).
+
+[build]
+  command = "npm run build:netlify"
+  publish = "_site"
+
+[build.environment]
+  # §3.3 gates minification on this. Get it wrong and unminified CSS ships silently.
+  NODE_ENV = "production"
+  NODE_VERSION = "20"
+
+[context.production]
+  # main is the only branch that reaches the live URL. `alpha` is the integration
+  # branch (AGENTS.md §3.0) and must only ever produce a branch deploy.
+  #
+  # NOTE: the production branch is a Netlify *site* setting and cannot be set from
+  # this file. Confirm it reads `main` in the UI before the first deploy (§11).

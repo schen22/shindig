@@ -1,0 +1,15 @@
+# Build output — Eleventy emits here; Netlify publishes it (§3.5).
+_site/
+
+# Dependencies
+node_modules/
+
+# Netlify CLI local state
+.netlify/
+
+# Logs
+npm-debug.log*
+yarn-error.log*
+
+# OS cruft — these land in every worktree otherwise (AGENTS.md §6.6)
+.DS_Store
