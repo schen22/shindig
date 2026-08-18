@@ -93,6 +93,24 @@
   font-weight: 700;
 }
 
+/* ── Photo ───────────────────────────────────────────────────────────────── */
+
+/* Fixed aspect-ratio reserves the image's box before it loads, so nothing
+   below it shifts. width/height on the <img> itself (src/details.md) back
+   this up per the HTML spec's own aspect-ratio inference — belt and braces. */
+.detail-photo {
+  margin: 0 0 var(--space-lg);
+}
+
+.detail-photo img {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  aspect-ratio: 800 / 554;
+  object-fit: cover;
+  border-radius: var(--t-radius);
+}
+
 /* ── Last updated ────────────────────────────────────────────────────────── */
 
 .last-updated {

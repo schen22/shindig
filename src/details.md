@@ -22,4 +22,10 @@ titleKey: titleDetails
   <li><span class="detail-list__label">Plus-ones</span> — Yeee, just make sure to specify in the form or give Sarah a head's up</li>
 </ul>
 
+<figure class="detail-photo">
+  <img src="/assets/images/taskmaster_uk_16_01_framed.jpg"
+       alt="A blindfolded rubber duck wearing a red &quot;TM&quot; badge stands on a tin can amid a stack of tin cans, in a gilded picture frame captioned &quot;The natural friends.&quot;"
+       width="800" height="554" loading="lazy">
+</figure>
+
 <p class="last-updated">Last updated August 17, 2026.</p>
