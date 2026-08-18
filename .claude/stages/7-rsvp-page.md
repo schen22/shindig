@@ -13,12 +13,10 @@ a naked iframe, and a fallback that works when the embed does not.
 ## END STATE
 
 - The form is embedded in a responsive container: container `width: 100%;
-  max-width: 640px`, iframe at `width: 100%`, `height: 1400px`,
+max-width: 640px`, iframe at `width: 100%`, `height: 1400px`,
   `title="RSVP form"`. Google's iframe does not auto-size to its content.
 - **A direct link to the form sits below the embed, always visible** — not only
   as an error state.
-- A callout sets the expectation about editing: Google emails a unique
-  per-response edit link on submission, and it cannot be printed on the page.
 - Page titles and callout copy come from `_data/themes.js`.
 - `npm run build` passes.
 
@@ -29,8 +27,10 @@ as a blank box with no route forward, and **the page cannot detect any of them.*
 One always-visible link covers every case and costs nothing.
 
 ```html
-<p class="form-fallback">Form not loading?
-  <a href="https://forms.gle/3fsynXeHFPaYjCmX6">Open it directly</a>.</p>
+<p class="form-fallback">
+  Form not loading?
+  <a href="https://forms.gle/3fsynXeHFPaYjCmX6">Open it directly</a>.
+</p>
 ```
 
 ## THE IFRAME IS OUTSIDE OUR CONTROL
