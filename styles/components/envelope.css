@@ -1,0 +1,186 @@
+/* ============================================================================
+   styles/components/envelope.css — Stage 5. Home ("/"): the envelope.
+
+   Two halves stacked on a seam; the seal is a plain <a href="/rsvp/"> pinned to
+   the seam's centre, so it works with JavaScript off (§4.0.4). Each half's
+   text is bottom/top-aligned toward the seam and stops one --seal-gap short of
+   the seal — the padding-bottom/padding-top below IS that clearance, so a
+   headline that wraps to three lines only grows away from the seam, never
+   toward it (5-home-envelope.md, "no text may pass under the seal").
+
+   public/assets/js/envelope.js drives two states, both scoped so the resting
+   layout never carries a transition it doesn't need:
+     .envelope.is-opening   — transient, added on click. Animates.
+     :root.envelope-open    — persisted via sessionStorage, read by the FROZEN
+                               inline script in base.liquid before first paint.
+                               No transition: the class is already on <html> at
+                               first style computation, so this is the resting
+                               state on arrival, not a snap into it.
+   ============================================================================ */
+
+.envelope {
+  --seal-size: 6rem;
+  --seal-gap: 1rem;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
+
+/* The clearance rule (§5.1). @supports is REQUIRED here — unlike tokens.css's
+   layer-3 color-mix(), an unsupported cqw here invalidates --seal-size, which
+   invalidates --seal-clear below, which drops padding to 0 and runs the
+   headline under the seal. That failure is not cosmetic. */
+@supports (container-type: inline-size) {
+  .envelope {
+    container-type: inline-size;
+    --seal-size: clamp(6rem, 19cqw, 7.5rem);
+    --seal-gap: clamp(1rem, 4cqw, 1.75rem);
+  }
+}
+
+/* Derived once, outside the guard, so it follows whichever pair won. */
+.envelope {
+  --seal-clear: calc(var(--seal-size) / 2 + var(--seal-gap));
+}
+
+/* The seam rule. --t-ink carries it (§4.1's token table lists "seam rule"
+   alongside body text and borders) — a hairline, not decorative surface, so
+   it is not --t-line or --t-rule. */
+.envelope::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--t-ink);
+  pointer-events: none;
+}
+
+.envelope-half {
+  position: relative;
+  flex: 1 1 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--space-xl) var(--space-md);
+  text-align: center;
+}
+
+.envelope-half--top {
+  justify-content: flex-end;
+  padding-bottom: var(--seal-clear);
+}
+
+.envelope-half--bottom {
+  justify-content: flex-start;
+  padding-top: var(--seal-clear);
+}
+
+.envelope-eyebrow,
+.envelope-tagline {
+  margin: 0;
+  font-family: var(--t-mono);
+  font-size: var(--fs-xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--t-muted);
+}
+
+.envelope-eyebrow {
+  margin-bottom: var(--space-sm);
+}
+
+.envelope-headline {
+  margin: 0;
+  max-width: var(--measure);
+}
+
+.envelope-subheadline {
+  margin: 0 0 var(--space-sm);
+  max-width: var(--measure);
+  font-size: var(--fs-lg);
+  color: var(--t-ink);
+}
+
+.envelope-tagline {
+  margin-top: var(--space-sm);
+}
+
+/* ── The seal ────────────────────────────────────────────────────────────── */
+.seal {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--seal-size);
+  height: var(--seal-size);
+  padding: var(--space-sm);
+  border-radius: 50%;
+  /* lit → primary → shadowed, per _data/palettes.js's waxLit/waxDark comment.
+     Decorative only; the label's own contrast is checked as bg-on-primary
+     (tests/contrast.js), not against this gradient. */
+  background: radial-gradient(
+    circle at 35% 30%,
+    var(--t-wax-lit),
+    var(--t-primary) 55%,
+    var(--t-wax-dark) 100%
+  );
+  box-shadow: 0 var(--space-2xs) var(--space-md) color-mix(in srgb, var(--t-ink) 35%, transparent);
+  color: var(--t-bg);
+  text-decoration: none;
+  transform: translate(-50%, -50%);
+}
+
+.seal-label {
+  font-family: var(--t-mono);
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: var(--lh-tight);
+}
+
+/* ── Opening — transient, JS-driven ──────────────────────────────────────────
+   envelope.js adds .is-opening on click and never removes it: the page
+   navigates away before removal would matter, so there is no reverse
+   transition to guard against (criterion 6, "no counter-spin on reset").
+   prefers-reduced-motion collapses these durations globally (styles/base.css)
+   — nothing component-specific is needed here for that. */
+.envelope.is-opening .seal {
+  transition: transform var(--spin-lg) var(--ease-envelope), opacity var(--fade-lg) var(--ease-envelope);
+  transform: translate(-50%, -50%) rotate(360deg) scale(0.8);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.envelope.is-opening .envelope-half--top {
+  transition: transform var(--spin-lg) var(--ease-envelope);
+  transform: translateY(calc(-1 * var(--seal-clear)));
+}
+
+.envelope.is-opening .envelope-half--bottom {
+  transition: transform var(--spin-lg) var(--ease-envelope);
+  transform: translateY(var(--seal-clear));
+}
+
+/* ── Opened — persisted (second visit) ───────────────────────────────────────
+   Removed from the flow, not merely hidden: display: none takes the seal out
+   of both the tab order and the accessibility tree, which opacity/pointer-
+   events alone would not (criterion 3). No transition on any of these three
+   rules — see the file banner. */
+:root.envelope-open .seal {
+  display: none;
+}
+
+:root.envelope-open .envelope-half--top {
+  transform: translateY(calc(-1 * var(--seal-clear)));
+}
+
+:root.envelope-open .envelope-half--bottom {
+  transform: translateY(var(--seal-clear));
+}
