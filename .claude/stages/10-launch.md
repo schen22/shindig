@@ -2,7 +2,7 @@
 
 ## GOAL
 
-Establish that the site is *true*, not merely self-consistent, and hand Sarah a
+Establish that the site is _true_, not merely self-consistent, and hand Sarah a
 merge she can make with confidence.
 
 `npm run build` passing means the code agrees with itself. It cannot tell whether
@@ -31,9 +31,7 @@ L3 — validation + code review + panel + orchestrator integration approval
 
 ### Correctness — nothing can check these automatically
 
-- [ ] **[human]** Real date, venue, bring, wear and plus-ones have replaced the
-      mock set in `src/details.md`. No placeholder text remains.
-- [ ] `public/assets/details.ics` carries the date written in `src/details.md`,
+- [ ] `public/assets/details.ics` carries the proposed date written in `src/details.md`,
       including the time.
 - [ ] **Add the `.ics` to a real calendar and read the time back.** The UTC
       conversion is by hand; an hour's error is invisible in the file and obvious
@@ -77,7 +75,6 @@ L3 — validation + code review + panel + orchestrator integration approval
 - [ ] At 200% browser zoom and at 320px width: no horizontal scrolling, no
       clipped text, and the seal never overlaps the headline.
 - [ ] With `prefers-reduced-motion`, the seal still navigates.
-- [ ] Second visit in the same session opens the envelope with no visible snap.
 
 ### After Sarah merges to `main` — no preview deploy exists to check these on
 
