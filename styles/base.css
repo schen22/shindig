@@ -120,7 +120,7 @@ b {
 
 small {
   font-size: var(--fs-sm);
-  color: var(--t-faint);
+  color: var(--t-muted);
 }
 
 a {

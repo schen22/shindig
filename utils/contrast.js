@@ -64,3 +64,28 @@ export function floorTo(ratio, places = 2) {
   const f = 10 ** places;
   return Math.floor(ratio * f) / f;
 }
+
+/**
+ * Reproduce `color-mix(in srgb, a P%, b)` — Layer 3's derived-surface formula
+ * (styles/tokens.css) — in gamma-encoded sRGB.
+ *
+ * The CSS `srgb` interpolation method blends the 8-bit channel values
+ * directly, not the linear-light ones `relativeLuminance` derives from them
+ * (§WCAG 2.x is explicit that those are different spaces). So this is a
+ * straight per-channel weighted average of the two colours' raw sRGB bytes,
+ * not a linearise/relinearise round trip.
+ *
+ * Mirrors the one-percentage form every layer-3 token uses: `b` implicitly
+ * takes the remainder, `100 - percentOfA`.
+ */
+export function mixSrgb(hexA, percentOfA, hexB) {
+  if (typeof percentOfA !== "number" || !Number.isFinite(percentOfA) || percentOfA < 0 || percentOfA > 100) {
+    throw new RangeError(`expected a 0–100 percentage, got ${JSON.stringify(percentOfA)}`);
+  }
+  const a = parseHex(hexA);
+  const b = parseHex(hexB);
+  const wA = percentOfA / 100;
+  const wB = 1 - wA;
+  const channel = (i) => Math.round(a[i] * wA + b[i] * wB);
+  return "#" + [0, 1, 2].map((i) => channel(i).toString(16).padStart(2, "0")).join("");
+}
