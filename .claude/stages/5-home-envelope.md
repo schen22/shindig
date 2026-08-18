@@ -21,12 +21,11 @@ opens into `/rsvp/`.
   sub-headline and tagline. **Each half's text runs to the seam and stops one
   `--seal-gap` short of the seal** — it is not centred in its half.
 - The seal is an `<a href="/rsvp/">`. With JavaScript off it still navigates.
-- Clicking it spins the seal 360° while fading it out, parts the halves, and at
-  ~900ms calls `location.assign("/rsvp/")`.
+- Clicking it spins the seal in a circular motion while fading it out, center line disappears, parts the halves, and at ~900ms calls `location.assign("/rsvp/")`.
+- Parting page half split is transform-only. Both halves animate
+  on translateY — no layout thrash, so it stays smooth on an old phone. Reduced motion respected. Under prefers-reduced-motion the halves cut away instantly and navigation happens immediately.
 - `prefers-reduced-motion: reduce` collapses the transitions; navigation still
   happens.
-- Second visit in the same session renders with the doors already parted and the
-  seal **removed from the flow**, with no visible snap.
 - `npm run build` passes.
 
 ## THE CLEARANCE RULE
