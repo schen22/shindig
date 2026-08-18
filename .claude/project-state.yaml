@@ -199,4 +199,4 @@ deferred:
       Stages 8 and 9 build on the mock set in full. Swapping in the real date,
       venue, bring/wear/plus-ones and photo is a human step on Stage 10.
 
-last_approved_alpha: PLACEHOLDER
+last_approved_alpha: 086481e
