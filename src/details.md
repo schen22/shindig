@@ -3,7 +3,11 @@ layout: base.liquid
 titleKey: titleDetails
 ---
 
-# Details
+{%- assign theme = themes[site.partyTheme] -%}
+
+# {{ theme.titleDetails }}
+
+{{ theme.detailsIntro }}
 
 <div class="callout">
   <span class="callout__seal" aria-hidden="true"></span>
