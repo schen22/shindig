@@ -34,16 +34,24 @@
     <meta property="og:site_name" content="A Shindig Thingamajig">
 
     <!-- Inline and before the stylesheet, or dark-mode users see a parchment flash.
-         Three jobs, all of which must happen before first paint:
+         Two jobs, both of which must happen before first paint:
            1. the js class, which gates the theme toggle (§4.7.3)
            2. the viewer's light/dark choice (§4.7.3)
-           3. the second-visit envelope flag (§5.1) — read here, not in the
-              deferred bundle, or / paints closed and then snaps open. -->
+
+         The read is in a try/catch because storage access THROWS where it is
+         denied — Safari's "Block All Cookies", a locked-down profile, some
+         private modes — it does not return null. Unguarded, the throw would
+         abort this script, and everything added below it would silently stop
+         running. The js class is set first and outside the guard so the toggle
+         is never displayed unable to do anything; a viewer with storage denied
+         simply gets no persistence, and the media query still resolves. -->
     <script>
       var d = document.documentElement;
       d.classList.add("js");
-      var t = localStorage.getItem("theme");
-      if (t) d.dataset.theme = t;
+      try {
+        var t = localStorage.getItem("theme");
+        if (t) d.dataset.theme = t;
+      } catch (e) {}
     </script>
 
     <!-- One sheet, generated, containing one palette (§3.3, §4.4). -->
