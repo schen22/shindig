@@ -27,6 +27,22 @@
 
     envelope.classList.add("is-opening");
 
+    // Warm /rsvp/ now, so the ~900ms opening covers the round trip instead of
+    // running before it: navigation below does not start until the halves have
+    // finished clearing, and without this the network only begins at that
+    // point. Same-origin and our own page — the stylesheet and fonts /rsvp/
+    // needs are already in this document's cache, so its HTML is the only
+    // thing left to fetch. Approved by Sarah, 2026-08-18: CLAUDE.md's "the
+    // page fetches nothing" governs external origins, which this is not.
+    //
+    // Failures are swallowed on purpose. This is an optimisation and the
+    // navigation must never depend on it having succeeded — an unhandled
+    // rejection here would be a console error on every visit for anyone
+    // offline or behind a blocker.
+    try {
+      fetch("/rsvp/", { credentials: "same-origin" }).catch(function () {});
+    } catch (e) {}
+
     // Invisible must not mean focusable: the seal starts fading/spinning
     // immediately (or, under reduced motion, is already visually gone within
     // 0.01ms — see below), so it comes out of the tab order for whatever
