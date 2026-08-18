@@ -141,13 +141,12 @@ deferred:
 
   - id: envelope-navigation-listener
     note: >-
-      envelope.js navigates on setTimeout(..., 0) after Sarah dropped the 900ms
-      delay on 2026-08-18 - a hardcoded guess at --spin-lg's duration, felt as
-      lag on every visit to '/' once the second-visit flag was removed. Replace
-      with a transitionend / animationend listener so navigation follows the
-      spin actually ending rather than a number that drifts when --spin-lg
-      changes. After all stages, per Sarah.
+      RESOLVED 2026-08-18 in 361ea39. envelope.js now navigates on the top
+      half's transform transitionend, with a 1200ms ceiling for the case where
+      the transition never starts. Brought forward from the backlog because
+      setTimeout(..., 0) removed the opening animation outright.
     decided: 2026-08-18
+    resolved: 361ea39
 
   - id: envelope-open-contract-staleness
     note: >-
