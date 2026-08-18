@@ -60,7 +60,13 @@ stages:
 
   - id: 10
     name: launch
-    status: pending
+    status: walked-with-failures
+    note: >-
+      Every criterion recorded pass/fail/deferred on 2026-08-18 (the contract's
+      STOP condition). Two real defects found, both needing their own stage
+      since Stage 10 NOT INCLUDED bars fixing in place: headers-not-deployed
+      and details-last-updated-stale. Launch is blocked on those plus the
+      [human] items, chiefly real-party-values.
 
 approved_decisions:
   - Eleventy v3, ESM, Liquid templates; Markdown for /details
@@ -193,6 +199,43 @@ deferred:
       (2026-08-18); the comment was corrected. Sarah then fixed the matching
       line in 6-theme-toggle.md. No toggle-360deg claim survives.
     decided: 2026-08-18
+
+  - id: headers-not-deployed
+    note: >-
+      BLOCKING FOR LAUNCH. _headers is tracked at the REPO ROOT, not in public/.
+      eleventy.config.js:11 passes through public/ -> "/", so robots.txt (which
+      IS in public/) reaches _site/robots.txt, but _headers never does - _site/
+      contains only assets, details, index.html, robots.txt, rsvp. Netlify
+      publishes _site, so Referrer-Policy: no-referrer and
+      X-Content-Type-Options: nosniff are NOT applied on the live site. This
+      fails two Stage 10 criteria directly. It matters more since Stage 9: the
+      new calendar.google.com link would hand Google the site address, and
+      footer.liquid:8-10 states the origin is the secret this project protects.
+      Fix is to move the file to public/_headers; verify _site/_headers exists
+      after a build. Needs its own stage.
+    decided: 2026-08-18
+    raised_by: Stage 10 walkthrough
+
+  - id: details-last-updated-stale
+    note: >-
+      src/details.md:36 reads "Last updated August 17, 2026" but the file was
+      changed on 2026-08-18 (Stage 9's calendar item, and Sarah's "TBD, aiming"
+      edit to the When line). Fails the Stage 10 criterion "The last updated
+      line on /details reflects today". Nothing regenerates this string - it is
+      hand-written, so it will go stale again on the next content edit. Worth
+      deciding whether it becomes a build-time date or stays by hand.
+    decided: 2026-08-18
+    raised_by: Stage 10 walkthrough
+
+  - id: stage10-second-visit-criterion-obsolete
+    note: >-
+      10-launch.md still lists "Second visit in the same session opens the
+      envelope with no visible snap" under Behaviour. That behaviour was
+      deliberately removed on 2026-08-18 when the sessionStorage flag was
+      withdrawn - the envelope now always renders closed. The criterion cannot
+      pass and should be struck. Escalated, not fixed; the contract is Sarah's.
+    decided: 2026-08-18
+    raised_by: Stage 10 walkthrough
 
   - id: calendar-url-drift
     note: >-
