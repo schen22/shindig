@@ -28,13 +28,15 @@ frozen inline script already implements.
 
 ## MOTION — SHARED WITH THE SEAL
 
-The toggle reuses the envelope's choreography from common tokens, so the site
+The toggle reuses the envelope's choreography from common tokens, but with a 180 degree transition so the site
 has one motion signature rather than two:
 
 ```css
 --ease-envelope: cubic-bezier(0.65, 0, 0.35, 1);
---spin-lg: 900ms;  --fade-lg: 700ms;   /* the seal   */
---spin-sm: 400ms;  --fade-sm: 300ms;   /* the toggle */
+--spin-lg: 900ms;
+--fade-lg: 700ms; /* the seal   */
+--spin-sm: 400ms;
+--fade-sm: 300ms; /* the toggle */
 ```
 
 Same curve, same spin-360°-and-fade. The shorter pair exists because the seal's
@@ -50,7 +52,7 @@ be `display: none` — a hidden element cannot animate out, which is the effect.
   at ~13.9:1 is what identifies the control, which is what the criterion asks
   for. Do not darken the ring into a second competing outline.
 - **The label names the action, not the state** — `aria-label="Switch to dark
-  theme"`, updated on toggle. A button labelled "Dark" is ambiguous about
+theme"`, updated on toggle. A button labelled "Dark" is ambiguous about
   whether that describes the current mode or the next one.
 
 ## IN SCOPE
