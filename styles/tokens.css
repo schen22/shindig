@@ -135,8 +135,10 @@
 /* ── 4 · Motion (§4.7.3) ────────────────────────────────────────────────────
    One motion signature for the whole site: the envelope seal (Wave 2a) and the
    theme toggle (Wave 2b) both read these rather than each defining its own.
-   Same curve and the same spin-360°-and-fade; the short pair exists because the
-   seal's timing on a 17px glyph reads as lag rather than ceremony.
+   Same curve and the same spin-and-fade; the short pair exists because the
+   seal's timing on a 17px glyph reads as lag rather than ceremony. The seal
+   turns a full 360°, the toggle 180° — a half turn is what carries one glyph
+   out and the other in (Sarah, 2026-08-18).
 
    prefers-reduced-motion is honoured globally in base.css, not per component.
    ------------------------------------------------------------------------- */
