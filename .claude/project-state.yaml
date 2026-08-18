@@ -229,11 +229,9 @@ deferred:
 
   - id: stage10-second-visit-criterion-obsolete
     note: >-
-      10-launch.md still lists "Second visit in the same session opens the
-      envelope with no visible snap" under Behaviour. That behaviour was
-      deliberately removed on 2026-08-18 when the sessionStorage flag was
-      withdrawn - the envelope now always renders closed. The criterion cannot
-      pass and should be struck. Escalated, not fixed; the contract is Sarah's.
+      RESOLVED 2026-08-18. Sarah struck the "Second visit ... no visible snap"
+      criterion from 10-launch.md, matching the withdrawal of the sessionStorage
+      flag. No criterion anywhere still describes removed behaviour.
     decided: 2026-08-18
     raised_by: Stage 10 walkthrough
 
@@ -291,7 +289,11 @@ deferred:
 
   - id: real-party-values
     note: >-
-      Stages 8 and 9 build on the mock set in full. Swapping in the real date,
-      venue, bring/wear/plus-ones and photo is a human step on Stage 10.
+      NO LONGER BLOCKS LAUNCH. Sarah removed the [human] "real values have
+      replaced the mock set" criterion from 10-launch.md on 2026-08-18 and
+      reworded the .ics check to "the proposed date". The site ships with
+      "TBD, aiming Saturday, Sep 5 · 2pm PT" and an .ics for that date.
+      Accepted consequence: the .ics presents as a firm calendar event a date
+      the page itself only proposes. Swap in real values whenever they exist.
 
 last_approved_alpha: 8498e02
