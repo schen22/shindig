@@ -2,11 +2,37 @@
    styles/components/envelope.css — Stage 5. Home ("/"): the envelope.
 
    Two halves stacked on a seam; the seal is a plain <a href="/rsvp/"> pinned to
-   the seam's centre, so it works with JavaScript off (§4.0.4). Each half's
-   text is bottom/top-aligned toward the seam and stops one --seal-gap short of
-   the seal — the padding-bottom/padding-top below IS that clearance, so a
-   headline that wraps to three lines only grows away from the seam, never
-   toward it (5-home-envelope.md, "no text may pass under the seal").
+   the seam's centre, so it works with JavaScript off (§4.0.4).
+
+   THE SEAM'S SHARED ORIGIN — fixed after review. .envelope-half--top and
+   --bottom both use `flex: 1 1 50%`, which only renders as an even 50/50 split
+   when the two halves' own content needs are equal. A three-line headline (or
+   any width where the two halves' natural content heights differ) makes the
+   true flex boundary land away from the container's 50% mid-point — but the
+   seal and the seam rule were both anchored to that mid-point (`top: 50%` on
+   `.envelope`), not to the boundary itself. The two origins only coincided by
+   accident.
+
+   The fix gives the seal, the seam rule and the clearance padding ONE shared
+   origin: the true rendered boundary between the two flex children, wherever
+   it lands. `.seal` is already the DOM sibling between the two halves — rather
+   than pulling it out of flow (`position: absolute`) and re-deriving the
+   boundary's position independently, it stays IN the flex flow and uses
+   `margin-block: calc(-1 * var(--seal-size) / 2)` to cancel its own height
+   contribution to zero. That leaves the two halves flush against each other
+   exactly where the browser actually renders their boundary — asymmetric
+   content included — while the seal itself, still occupying that flow slot,
+   visually straddles the boundary symmetrically. The seam rule is drawn off
+   `.envelope-half--top`'s own bottom edge (`::after`, `bottom: 0`) rather than
+   off `.envelope`'s mid-point, for the same reason — it is the same edge the
+   seal now sits on, not a separate estimate of where that edge should be.
+
+   Each half's text is bottom/top-aligned toward the seam and stops one
+   --seal-gap short of the seal — the padding-bottom/padding-top below IS that
+   clearance. This arithmetic is unchanged by the anchor fix (it was already
+   correct); only the point it measures from moved. A three-line headline only
+   grows the top half away from the seam, never toward it, because the padding
+   is measured from that half's own edge — the same edge the seal now shares.
 
    public/assets/js/envelope.js drives two states, both scoped so the resting
    layout never carries a transition it doesn't need:
@@ -44,20 +70,6 @@
   --seal-clear: calc(var(--seal-size) / 2 + var(--seal-gap));
 }
 
-/* The seam rule. --t-ink carries it (§4.1's token table lists "seam rule"
-   alongside body text and borders) — a hairline, not decorative surface, so
-   it is not --t-line or --t-rule. */
-.envelope::after {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: var(--t-ink);
-  pointer-events: none;
-}
-
 .envelope-half {
   position: relative;
   flex: 1 1 50%;
@@ -71,6 +83,20 @@
 .envelope-half--top {
   justify-content: flex-end;
   padding-bottom: var(--seal-clear);
+}
+
+/* The seam rule, off the true boundary — see the file banner. --t-ink carries
+   it (§4.1's token table lists "seam rule" alongside body text and borders) —
+   a hairline, not decorative surface, so it is not --t-line or --t-rule. */
+.envelope-half--top::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--t-ink);
+  pointer-events: none;
 }
 
 .envelope-half--bottom {
@@ -110,9 +136,13 @@
 
 /* ── The seal ────────────────────────────────────────────────────────────── */
 .seal {
-  position: absolute;
-  top: 50%;
-  left: 50%;
+  /* In-flow flex item, not position: absolute — see the file banner. Zero net
+     height contribution (height cancelled by equal negative block margins)
+     puts it exactly on the true boundary between the two halves, straddling
+     it symmetrically, whatever that boundary's asymmetric content did to it. */
+  flex: 0 0 auto;
+  align-self: center;
+  margin-block: calc(-1 * var(--seal-size) / 2);
   z-index: 1;
   display: flex;
   align-items: center;
@@ -133,7 +163,6 @@
   box-shadow: 0 var(--space-2xs) var(--space-md) color-mix(in srgb, var(--t-ink) 35%, transparent);
   color: var(--t-bg);
   text-decoration: none;
-  transform: translate(-50%, -50%);
 }
 
 .seal-label {
@@ -150,10 +179,11 @@
    navigates away before removal would matter, so there is no reverse
    transition to guard against (criterion 6, "no counter-spin on reset").
    prefers-reduced-motion collapses these durations globally (styles/base.css)
-   — nothing component-specific is needed here for that. */
+   — nothing component-specific is needed here for that; envelope.js shortens
+   its own navigation timer separately for that visitor (see that file). */
 .envelope.is-opening .seal {
   transition: transform var(--spin-lg) var(--ease-envelope), opacity var(--fade-lg) var(--ease-envelope);
-  transform: translate(-50%, -50%) rotate(360deg) scale(0.8);
+  transform: rotate(360deg) scale(0.8);
   opacity: 0;
   pointer-events: none;
 }
