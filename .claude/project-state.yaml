@@ -1,7 +1,7 @@
 # Execution state only. Not a second copy of the product definition.
 # The orchestrator reads this first and writes it last.
 
-current_stage: 5
+current_stage: 9
 
 stages:
   - id: 0
@@ -31,23 +31,27 @@ stages:
 
   - id: 5
     name: home-envelope
-    status: pending
+    status: complete
     group: features
+    merged: 30fc35e
 
   - id: 6
     name: theme-toggle
-    status: pending
+    status: complete
     group: features
+    merged: ab6f9e2
 
   - id: 7
     name: rsvp-page
-    status: pending
+    status: complete
     group: features
+    merged: dd81c99
 
   - id: 8
     name: details-page
-    status: pending
+    status: complete
     group: features
+    merged: 1a00518
 
   - id: 9
     name: content-and-calendar
@@ -77,6 +81,18 @@ approved_decisions:
     Opus-for-reviewers line in 06e1f9f. Matches expert-reviewer.md as written.
   - Parallelism is for clean merges, not speed - coordination costs most of what
     it saves on a site this size
+  - envelope.js warms /rsvp/ with a same-origin fetch on click so the opening
+    covers the round trip - Sarah's call (2026-08-18). "The page fetches
+    nothing" governs external origins; this is our own page.
+  - The seal turns 360deg, the theme toggle 180deg - Sarah's call (2026-08-18),
+    resolving the panel's Important finding. The code was already 180deg; the
+    comments claiming parity were what was wrong.
+  - The envelope navigates when the opening finishes, not on a timer and not at
+    click time - Sarah's call (2026-08-18). Both halves clear the viewport, so
+    the swap lands on a flat --t-bg field identical to /rsvp/'s ground.
+  - No page-entry fade on /rsvp/ - considered and dropped (2026-08-18). Scoping
+    it to that one page needed either a wrapper element in Stage 7's template
+    or :has(), which shipped in Firefox 121 and breaks the 113 floor.
 
 deferred:
   - id: font-payload
@@ -157,9 +173,30 @@ deferred:
       was removed by Sarah; these three lines were not. Escalated, not fixed.
     decided: 2026-08-18
 
+  - id: panel-minor-findings
+    note: >-
+      Expert panel (Sonnet) on merged alpha, 2026-08-18, scored 92.1/100. Its
+      one Important finding (toggle 180deg vs comments claiming 360deg) was
+      ruled on by Sarah and is closed. Four minor items left open, none
+      blocking: redundant color: var(--t-primary) in three component files;
+      the toggle's default aria-label is momentarily wrong before first click
+      when the OS preference is dark; tests/output.js has no page-weight
+      budget, only a font-payload ceiling; the 900 magic number it flagged in
+      envelope.js is obsolete, resolved by 361ea39.
+    decided: 2026-08-18
+
+  - id: toggle-comment-drift
+    note: >-
+      RESOLVED. tokens.css claimed both controls shared a 360deg spin while
+      toggle.css had always used 180deg. Sarah ruled 180deg correct
+      (2026-08-18); the comment was corrected. 6-theme-toggle.md still carries
+      the same stale "spin-360deg-and-fade" line under MOTION, two lines below
+      Sarah's own "but with a 180 degree transition" - escalated, hers to edit.
+    decided: 2026-08-18
+
   - id: real-party-values
     note: >-
       Stages 8 and 9 build on the mock set in full. Swapping in the real date,
       venue, bring/wear/plus-ones and photo is a human step on Stage 10.
 
-last_approved_alpha: 59da394
+last_approved_alpha: PLACEHOLDER
