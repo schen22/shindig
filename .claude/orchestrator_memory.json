@@ -11,9 +11,9 @@
       "id": "GOTCHA-001",
       "category": "javascript",
       "rule": "localStorage and sessionStorage THROW SecurityError when storage is denied (Safari 'Block All Cookies', Firefox blocking cookies, some webviews) - they do not return null. Every access must sit in try/catch, and any state change that must happen anyway (a class toggle, a navigation) must sit OUTSIDE the try.",
-      "why_it_recurs": "The frozen reference implementation at _includes/base.liquid:43-47 demonstrates unguarded access and documents the key names but never mentions throwing. Stage 6's contract instructs agents to read that file 'for the read half of the contract', so the assumption propagates from a file nobody may correct.",
+      "why_it_recurs": "The frozen reference implementation at _includes/base.liquid:43-47 demonstrates unguarded access and documents the key names but never mentions throwing. Stage 6's contract instructs agents to read that file 'for the read half of the contract', so the assumption propagates from a file nobody may correct. RESOLVED at source 2026-08-18: the reference now demonstrates the guard and says in a comment that storage throws, so agents reading it for 'the read half of the contract' inherit the correct pattern.",
       "observed_instances": [
-        "_includes/base.liquid:43-47 - FROZEN, STILL UNFIXED. Benign: the js class is set on the preceding line, so the toggle still renders and the envelope merely re-animates.",
+        "_includes/base.liquid - FIXED in 95355bd, after Sarah unfroze it. Was the reference implementation the other two copied. Measured with localStorage stubbed to throw: pre-fix every load raised an uncaught SecurityError; post-fix none, js class set either way, data-theme correctly unset.",
         "public/assets/js/theme.js - fixed in 896985b. Unguarded it left a visible, focusable, labelled toggle that did nothing on click.",
         "public/assets/js/envelope.js - fixed in 956318c. Severe: the throw landed between preventDefault() and the navigation, killing the only route off '/' since base.liquid hides header and footer there."
       ],
@@ -26,7 +26,8 @@
         "implementer"
       ],
       "inject_when": "the stage writes client JS or touches the theme/envelope storage seam",
-      "contract_root_cause": "The acceptance criteria that should catch this are scoped BY CAUSE, not by outcome. 6-theme-toggle.md AC1 says 'With JavaScript disabled, the toggle is absent, not dead' and 5-home-envelope.md AC1 says 'With JS disabled, the seal navigates'. Denied storage produces the identical symptom with JS ENABLED, so both criteria read as satisfied while the failure ships. Fix the contract, not just the code: 'never present-but-inert, whatever the cause - JS disabled, script failure, or denied storage.' That phrasing fails the original code and requires no agent to enumerate causes correctly."
+      "contract_root_cause": "The acceptance criteria that should catch this are scoped BY CAUSE, not by outcome. 6-theme-toggle.md AC1 says 'With JavaScript disabled, the toggle is absent, not dead' and 5-home-envelope.md AC1 says 'With JS disabled, the seal navigates'. Denied storage produces the identical symptom with JS ENABLED, so both criteria read as satisfied while the failure ships. Fix the contract, not just the code: 'never present-but-inert, whatever the cause - JS disabled, script failure, or denied storage.' That phrasing fails the original code and requires no agent to enumerate causes correctly.",
+      "status": "closed - all three call sites guarded; keep injecting, the platform fact still applies to new client JS"
     },
     {
       "id": "GOTCHA-002",
@@ -169,7 +170,8 @@
       "rule": "Write acceptance criteria scoped by OUTCOME, not by cause. A criterion naming one trigger ('with JS disabled') is satisfied by a second trigger with the same symptom, and the agent is right to call it met.",
       "why_it_matters": "This is the contract-level root of GOTCHA-001, which recurred in 2 of 2 stages writing client JS. Both agents satisfied their criterion exactly as written and shipped the failure it was meant to prevent.",
       "observed_instances": [
-        "6-theme-toggle.md AC1 and 5-home-envelope.md AC1 - both cause-scoped to 'JS disabled'; denied storage bypassed both."
+        "6-theme-toggle.md AC1 and 5-home-envelope.md AC1 - both cause-scoped to 'JS disabled'; denied storage bypassed both.",
+        "Both AC1s were amended by Sarah on 2026-08-18 with an outcome-scoped clause: 'For any error: do not display a control that can't do anything.' 10-launch.md gained a matching cookies-and-storage-blocked walk-through."
       ],
       "observed_models": [],
       "confidence_score": 0.93,
