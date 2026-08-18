@@ -3,18 +3,33 @@ layout: base.liquid
 titleKey: titleDetails
 ---
 
-<!--
-  STUB — Wave 0 ships this so the build has three pages. WAVE 2d REPLACES THIS
-  CONTENT per PRD §5.3 and §4.5 (callout carrying the deadline, themed bullet
-  list, optional fixed-aspect-ratio photo, "last updated" line), building
-  against the mock value set in AGENTS.md §3 Wave 3. WAVE 3 later replaces the
-  mock values with the real date, venue and prose.
+{%- assign theme = themes[site.partyTheme] -%}
 
-  Markdown with front matter, not a template — this page is hand-written prose
-  and changes more often than anything else on the site (§5.3).
+# {{ theme.titleDetails }}
 
-  src/details.md and public/assets/details.ics must carry the SAME date. It is
-  the repo's only by-hand agreement (§11) and nothing checks it.
--->
+{{ theme.detailsIntro }}
 
-Wave 0 scaffold stub — the party details land here in Wave 2d.
+<div class="callout">
+  <span class="callout__seal" aria-hidden="true"></span>
+  <p class="callout__eyebrow">One thing to do</p>
+  <p class="callout__body">
+    RSVP by <strong>Saturday, Sep 5</strong> so we know to expect you — head
+    over to <a href="/rsvp/">the RSVP page</a> when you get a minute.
+  </p>
+</div>
+
+<ul class="detail-list">
+  <li><span class="detail-list__label">When</span> — Saturday, Sep 5 · 2pm PT</li>
+  <li><span class="detail-list__label">Where</span> — TBD</li>
+  <li><span class="detail-list__label">Bring</span> — Just yourself</li>
+  <li><span class="detail-list__label">Wear</span> — Whatever you'd wear to a park</li>
+  <li><span class="detail-list__label">Plus-ones</span> — Yeee, just make sure to specify in the form or give Sarah a head's up</li>
+</ul>
+
+<figure class="detail-photo">
+  <img src="/assets/images/taskmaster_uk_16_01_framed.jpg"
+       alt="A blindfolded rubber duck wearing a red &quot;TM&quot; badge stands on a tin can amid a stack of tin cans, in a gilded picture frame captioned &quot;The natural friends.&quot;"
+       width="800" height="554" loading="lazy">
+</figure>
+
+<p class="last-updated">Last updated August 17, 2026.</p>
