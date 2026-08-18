@@ -180,9 +180,10 @@
    envelope.js adds .is-opening on click and never removes it: the page
    navigates away before removal would matter, so there is no reverse
    transition to guard against (criterion 6, "no counter-spin on reset").
-   prefers-reduced-motion collapses these durations globally (styles/base.css)
-   — nothing component-specific is needed here for that; envelope.js shortens
-   its own navigation timer separately for that visitor (see that file). */
+   prefers-reduced-motion collapses these durations to 0.01ms globally
+   (styles/base.css) — nothing component-specific is needed here for that.
+   envelope.js navigates on this rule's transitionend, so that collapse also
+   makes navigation effectively instant for that visitor. */
 .envelope.is-opening .seal {
   transition: transform var(--spin-lg) var(--ease-envelope), opacity var(--fade-lg) var(--ease-envelope);
   transform: rotate(360deg) scale(0.8);

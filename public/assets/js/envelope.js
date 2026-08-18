@@ -34,14 +34,35 @@
     // nothing left for a keyboard user to do with it.
     seal.setAttribute("tabindex", "-1");
 
-    // Navigate immediately (Sarah, 2026-08-18). This was a 900ms timer matching
-    // --spin-lg, so the seal's turn could finish before the page changed under
-    // it — but a hardcoded guess at an animation's duration is felt as lag on
-    // every visit, and it drifts the moment --spin-lg changes. Backlog item
-    // envelope-navigation-listener replaces this with a transitionend /
-    // animationend listener, which navigates when the spin actually ends.
-    setTimeout(function () {
+    // Navigate when the opening actually finishes, not on a timer. A hardcoded
+    // duration was either felt as lag (900ms, even after the spin had ended) or
+    // cut the animation off entirely (0ms) — and either way it silently drifts
+    // from --spin-lg the moment that token changes.
+    //
+    // The top half's transform is the longest-running of the three transitions
+    // and the one that reads as "opening", so it is the one worth waiting for.
+    // prefers-reduced-motion collapses every duration to 0.01ms globally
+    // (styles/base.css), so transitionend fires almost immediately for that
+    // visitor and navigation stays effectively instant.
+    var top = envelope.querySelector(".envelope-half--top");
+    var gone = false;
+    function go() {
+      if (gone) return;
+      gone = true;
       location.assign("/rsvp/");
-    }, 0);
+    }
+
+    if (top) {
+      top.addEventListener("transitionend", function (e) {
+        if (e.propertyName === "transform") go();
+      });
+    }
+
+    // Safety net: transitionend does not fire if the transition never starts —
+    // a display change, a browser that drops it, or transitions disabled
+    // outright. Without this the seal would be a dead link in those cases,
+    // which is exactly what criterion 2 forbids. 1200ms is a ceiling, not a
+    // schedule: it only ever runs when the event did not.
+    setTimeout(go, 1200);
   });
 })();
