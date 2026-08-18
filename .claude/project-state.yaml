@@ -1,7 +1,7 @@
 # Execution state only. Not a second copy of the product definition.
 # The orchestrator reads this first and writes it last.
 
-current_stage: 4
+current_stage: 5
 
 stages:
   - id: 0
@@ -26,7 +26,8 @@ stages:
 
   - id: 4
     name: themed-copy
-    status: pending
+    status: complete
+    merged: 59da394
 
   - id: 5
     name: home-envelope
@@ -110,9 +111,34 @@ deferred:
       where the expert panel runs.
     decided: 2026-08-17
 
+  - id: rsvp-callout-duplication
+    note: >-
+      Stage 4's calloutTitle/calloutBody carry embed-fallback messaging, and
+      Stage 7 fixes a form-fallback paragraph saying the same thing verbatim —
+      /rsvp/ would state it twice. Stage 7 cannot fix it (themes.js is the
+      content-worker's). Retune the two lines, or have Stage 7 render no
+      callout. Not blocking: Sarah removed the edit-link requirement that made
+      this a contract conflict.
+    decided: 2026-08-17
+
+  - id: callout-key-arity
+    note: >-
+      Stage 8's deadline callout has no themed key of its own; one
+      calloutTitle/calloutBody pair cannot serve two pages with two meanings.
+      A sixteenth key needs tests/copy.js REQUIRED_KEYS changed, which no
+      current stage owns.
+    decided: 2026-08-17
+
+  - id: stage4-required-reading-gap
+    note: >-
+      Stage 4 mandated callout keys whose semantics lived only in Stage 7's
+      contract, which Stage 4 was barred from reading. The contract's design,
+      not the agent's judgment. Patch before adding another key.
+    decided: 2026-08-17
+
   - id: real-party-values
     note: >-
       Stages 8 and 9 build on the mock set in full. Swapping in the real date,
       venue, bring/wear/plus-ones and photo is a human step on Stage 10.
 
-last_approved_alpha: f9d385d
+last_approved_alpha: 59da394
