@@ -1,0 +1,103 @@
+/* ============================================================================
+   styles/components/callout.css — Stage 8, /details/.
+
+   Two components live in this one file rather than one apiece: Stage 8's
+   IN SCOPE grants exactly one component stylesheet, and the contract's
+   COMPONENTS section describes the deadline callout and the themed detail
+   list together. Tokens only, per the §4.1 contract in CLAUDE.md — no raw
+   colour, radius, typeface or party copy below.
+   ============================================================================ */
+
+/* ── Callout card ────────────────────────────────────────────────────────── */
+
+.callout {
+  position: relative;
+  margin: var(--space-xl) 0 var(--space-lg);
+  padding: var(--space-lg) var(--space-md) var(--space-md);
+  background: var(--t-card);
+  border-radius: var(--t-radius);
+  box-shadow:
+    0 12px 28px -16px var(--t-line),
+    0 2px 8px var(--t-line);
+}
+
+/* Seal emblem straddling the top edge. Decorative only — drawn from the wax
+   tokens rather than any asset or text, so it never needs a copy key and
+   never competes with the page's other ornament. */
+.callout__seal {
+  position: absolute;
+  top: 0;
+  left: var(--space-lg);
+  width: 2.5rem;
+  height: 2.5rem;
+  transform: translateY(-50%);
+  border-radius: 50%;
+  background: radial-gradient(circle at 32% 28%, var(--t-wax-lit), var(--t-wax-dark));
+  box-shadow: 0 4px 10px -4px var(--t-line);
+}
+
+.callout__eyebrow {
+  margin: 0 0 var(--space-2xs);
+  font-family: var(--t-mono);
+  font-size: var(--fs-xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--t-muted);
+}
+
+.callout__body {
+  margin: 0;
+  font-size: var(--fs-lg);
+  line-height: var(--lh-body);
+  color: var(--t-ink);
+}
+
+.callout__body a {
+  color: var(--t-primary);
+}
+
+/* ── Themed detail list ──────────────────────────────────────────────────── */
+
+.detail-list {
+  list-style: none;
+  margin: 0 0 var(--space-lg);
+  padding: 0;
+  display: grid;
+  gap: var(--space-sm);
+}
+
+.detail-list li {
+  position: relative;
+  padding-left: var(--space-lg);
+  color: var(--t-ink);
+  line-height: var(--lh-body);
+}
+
+/* ::marker cannot take a box-shadow, which is what makes the ring, so the
+   bullet is drawn with ::before instead of list-style. --t-primary core,
+   --t-accent ring — both decorative only. */
+.detail-list li::before {
+  content: "";
+  position: absolute;
+  left: var(--space-2xs);
+  top: 0.55em;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--t-primary);
+  box-shadow: 0 0 0 3px var(--t-accent);
+}
+
+.detail-list__label {
+  font-family: var(--t-display);
+  font-weight: 700;
+}
+
+/* ── Last updated ────────────────────────────────────────────────────────── */
+
+.last-updated {
+  margin-top: var(--space-lg);
+  font-family: var(--t-mono);
+  font-size: var(--fs-xs);
+  color: var(--t-muted);
+}
