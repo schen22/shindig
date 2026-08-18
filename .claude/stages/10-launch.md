@@ -50,6 +50,9 @@ L3 — validation + code review + panel + orchestrator integration approval
 - [ ] The submit button is reachable without scrolling inside the iframe.
 - [ ] "Allow responders to edit after submit" is on.
 - [ ] The fallback link opens the form directly.
+- [ ] With cookies blocked, load `/rsvp/` and confirm what a guest actually
+      sees: if the iframe is blank or refuses to submit, the direct link is
+      visible without scrolling and reaches the form.
 - [ ] **[human]** A test response lands in the private Sheet, and the Sheet is
       still private.
 
@@ -65,8 +68,14 @@ L3 — validation + code review + panel + orchestrator integration approval
 - [ ] Fonts load — the headline is Fraunces, not Georgia.
 - [ ] With JavaScript disabled: the seal still navigates, the toggle is absent,
       the page is readable.
+- [ ] With cookies and storage blocked (Safari → Settings → Privacy → Block All
+      Cookies): the seal still navigates to `/rsvp/`, and the toggle still
+      switches the palette for the session. No control anywhere is displayed
+      but unable to do anything.
 - [ ] Tab through every page: skip link first, focus always visible, nothing
       invisible receives focus.
+- [ ] At 200% browser zoom and at 320px width: no horizontal scrolling, no
+      clipped text, and the seal never overlaps the headline.
 - [ ] With `prefers-reduced-motion`, the seal still navigates.
 - [ ] Second visit in the same session opens the envelope with no visible snap.
 

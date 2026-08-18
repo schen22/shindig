@@ -96,16 +96,18 @@ L2 — validation + code review, then panel at the group boundary
 
 ## ACCEPTANCE CRITERIA
 
-1. With JavaScript disabled, the toggle is **absent, not dead**, and the OS dark
-   preference still resolves through the media query.
-2. Each glyph is bound to a state in CSS; the click handler does not swap icons.
-3. Neither glyph uses `display: none`.
-4. The `aria-label` names the next action and updates on toggle.
-5. Decorative SVG carries `aria-hidden="true"`.
-6. The palette flips on the same frame as the click.
-7. `npm run build` passes.
-8. No file outside IN SCOPE is touched.
+1. If JS is disabled, the toggle is absent — not in the tab order nor the
+   accessibility tree. The OS dark preference still resolves through the media
+   query.
+2. For any error: do not display a control that can't do anything.
+3. Each glyph is bound to a state in CSS; the click handler does not swap icons.
+4. Neither glyph uses `display: none`.
+5. The `aria-label` names the next action and updates on toggle.
+6. Decorative SVG carries `aria-hidden="true"`.
+7. The palette flips on the same frame as the click.
+8. `npm run build` passes.
+9. No file outside IN SCOPE is touched.
 
 ## STOP
 
-Return when all eight acceptance criteria are true. Do not begin another stage.
+Return when all nine acceptance criteria are true. Do not begin another stage.

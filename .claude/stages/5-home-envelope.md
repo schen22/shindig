@@ -35,7 +35,10 @@ The seal and its gap both scale with container width. Static floors first, then
 the container-query upgrade:
 
 ```css
-.envelope { --seal-size: 6rem; --seal-gap: 1rem; }
+.envelope {
+  --seal-size: 6rem;
+  --seal-gap: 1rem;
+}
 @supports (container-type: inline-size) {
   .envelope {
     container-type: inline-size;
@@ -105,16 +108,17 @@ L2 — validation + code review, then panel at the group boundary
 ## ACCEPTANCE CRITERIA
 
 1. With JavaScript disabled, the seal navigates to `/rsvp/`.
-2. No text passes under the seal at any viewport width, including with the
+2. For any error: do not display a control that can't do anything.
+3. No text passes under the seal at any viewport width, including with the
    headline wrapped to three lines.
-3. Once open, the seal is not focusable — `opacity: 0` and `pointer-events` are
+4. Once open, the seal is not focusable — `opacity: 0` and `pointer-events` are
    not sufficient on their own.
-4. On second visit the seal is **removed**, not hidden.
-5. With `prefers-reduced-motion`, navigation still happens.
-6. The spin plays on opening only; no counter-spin on reset.
-7. `npm run build` passes.
-8. No file outside IN SCOPE is touched.
+5. On second visit the seal is **removed**, not hidden.
+6. With `prefers-reduced-motion`, navigation still happens.
+7. The spin plays on opening only; no counter-spin on reset.
+8. `npm run build` passes.
+9. No file outside IN SCOPE is touched.
 
 ## STOP
 
-Return when all eight acceptance criteria are true. Do not begin another stage.
+Return when all nine acceptance criteria are true. Do not begin another stage.

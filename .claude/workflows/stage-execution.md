@@ -49,6 +49,9 @@ Rules that hold at every level:
 - **Score alone never closes a stage.** The orchestrator does.
 - Anything contradicting `CLAUDE.md`, a stage contract, or a recorded decision
   is **escalated, not fixed**.
+- Individual code merges are not blocked by contract findings. However, a
+  contract defect is classified as major if it recurs across two or more
+  agents. This must be escalated, not fixed, and blocks stage close.
 
 ## Validation
 
