@@ -23,7 +23,18 @@
 
     event.preventDefault();
 
-    sessionStorage.setItem("envelopeOpened", "1");
+    // The animation and the navigation must not depend on storage succeeding:
+    // a denied write (Safari "Block All Cookies", Firefox with cookies
+    // blocked) throws SecurityError, and unguarded that would stop dead here
+    // — after preventDefault, before the animation or setTimeout below ever
+    // run, leaving the only route off "/" doing nothing on click. Denied
+    // storage just means the envelope re-animates next visit instead of
+    // remembering.
+    try {
+      sessionStorage.setItem("envelopeOpened", "1");
+    } catch (e) {
+      // Storage denied — session-only, as above.
+    }
     envelope.classList.add("is-opening");
 
     // ~900ms matches --spin-lg (styles/tokens.css) — the seal's full turn.
