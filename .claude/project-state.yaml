@@ -73,6 +73,8 @@ approved_decisions:
   - waxLit / waxDark are palette keys, not derived tokens (2026-08-17)
   - Fonts - Fontsource latin subset, passthrough-copied from node_modules (2026-08-17)
   - Expert panel is report-only; findings route to the file's owner
+  - Expert panel runs on Sonnet - Sarah's call (2026-08-18), overriding the
+    Opus-for-reviewers line in 06e1f9f. Matches expert-reviewer.md as written.
   - Parallelism is for clean merges, not speed - coordination costs most of what
     it saves on a site this size
 
@@ -107,8 +109,9 @@ deferred:
       blind spots is a rubber stamp with a budget"); bbdfcd5 dissolved AGENTS.md
       into .claude/agents/ and wrote model: sonnet into code-reviewer.md and
       expert-reviewer.md, dropping the decision. Stage 3's L1 review therefore
-      ran on Sonnet. Sarah's call, not the orchestrator's. Bears on Stage 5-8,
-      where the expert panel runs.
+      ran on Sonnet. Sarah ruled on 2026-08-18 that the expert panel runs on
+      Sonnet; the per-agent code-reviewer is still unruled and has been
+      dispatched on Opus throughout Stages 4-7.
     decided: 2026-08-17
 
   - id: rsvp-callout-duplication
@@ -135,6 +138,25 @@ deferred:
       contract, which Stage 4 was barred from reading. The contract's design,
       not the agent's judgment. Patch before adding another key.
     decided: 2026-08-17
+
+  - id: envelope-navigation-listener
+    note: >-
+      envelope.js navigates on setTimeout(..., 0) after Sarah dropped the 900ms
+      delay on 2026-08-18 - a hardcoded guess at --spin-lg's duration, felt as
+      lag on every visit to '/' once the second-visit flag was removed. Replace
+      with a transitionend / animationend listener so navigation follows the
+      spin actually ending rather than a number that drifts when --spin-lg
+      changes. After all stages, per Sarah.
+    decided: 2026-08-18
+
+  - id: envelope-open-contract-staleness
+    note: >-
+      5-home-envelope.md still describes the withdrawn persisted state - END
+      STATE says 'at ~900ms calls location.assign' and 'Second visit in the same
+      session renders with the doors already parted', and NOT INCLUDED bars
+      'writing the second-visit flag anywhere but sessionStorage'. Criterion 5
+      was removed by Sarah; these three lines were not. Escalated, not fixed.
+    decided: 2026-08-18
 
   - id: real-party-values
     note: >-

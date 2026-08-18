@@ -34,17 +34,14 @@
     // nothing left for a keyboard user to do with it.
     seal.setAttribute("tabindex", "-1");
 
-    // prefers-reduced-motion collapses the CSS transition to 0.01ms globally
-    // (styles/base.css), so a reduced-motion visitor sees the seal vanish and
-    // the halves part instantly, then nothing — the page would otherwise sit
-    // visibly unchanged for the rest of the 900ms with no animation left to
-    // finish. That full duration exists to let the (non-reduced) spin play out
-    // before navigating out from under it; with no animation there is no race
-    // to protect, so reduced motion navigates immediately instead of waiting
-    // on a timer whose only job just went away.
-    var reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    // Navigate immediately (Sarah, 2026-08-18). This was a 900ms timer matching
+    // --spin-lg, so the seal's turn could finish before the page changed under
+    // it — but a hardcoded guess at an animation's duration is felt as lag on
+    // every visit, and it drifts the moment --spin-lg changes. Backlog item
+    // envelope-navigation-listener replaces this with a transitionend /
+    // animationend listener, which navigates when the spin actually ends.
     setTimeout(function () {
       location.assign("/rsvp/");
-    }, reduced ? 0 : 900);
+    }, 0);
   });
 })();

@@ -113,12 +113,11 @@ L2 — validation + code review, then panel at the group boundary
    headline wrapped to three lines.
 4. Once open, the seal is not focusable — `opacity: 0` and `pointer-events` are
    not sufficient on their own.
-5. On second visit the seal is **removed**, not hidden.
-6. With `prefers-reduced-motion`, navigation still happens.
-7. The spin plays on opening only; no counter-spin on reset.
-8. `npm run build` passes.
-9. No file outside IN SCOPE is touched.
+5. With `prefers-reduced-motion`, navigation still happens.
+6. The spin plays on opening only; no counter-spin on reset.
+7. `npm run build` passes.
+8. No file outside IN SCOPE is touched.
 
 ## STOP
 
-Return when all nine acceptance criteria are true. Do not begin another stage.
+Return when all eight acceptance criteria are true. Do not begin another stage.

@@ -34,14 +34,16 @@
    grows the top half away from the seam, never toward it, because the padding
    is measured from that half's own edge — the same edge the seal now shares.
 
-   public/assets/js/envelope.js drives two states, both scoped so the resting
-   layout never carries a transition it doesn't need:
+   public/assets/js/envelope.js drives one state, scoped so the resting layout
+   never carries a transition it doesn't need:
      .envelope.is-opening   — transient, added on click. Animates.
-     :root.envelope-open    — persisted via sessionStorage, read by the FROZEN
-                               inline script in base.liquid before first paint.
-                               No transition: the class is already on <html> at
-                               first style computation, so this is the resting
-                               state on arrival, not a snap into it.
+
+   There was a second, persisted state — :root.envelope-open, set from
+   sessionStorage by the frozen inline script — which rendered the envelope
+   already parted with the seal removed. It was withdrawn on 2026-08-18: the
+   seal is the only link on "/", since header and footer are both suppressed
+   there, so a return visit left the page with no route to /rsvp/ at all. The
+   flag is no longer written and these rules are gone with it.
    ============================================================================ */
 
 .envelope {
@@ -195,22 +197,5 @@
 
 .envelope.is-opening .envelope-half--bottom {
   transition: transform var(--spin-lg) var(--ease-envelope);
-  transform: translateY(var(--seal-clear));
-}
-
-/* ── Opened — persisted (second visit) ───────────────────────────────────────
-   Removed from the flow, not merely hidden: display: none takes the seal out
-   of both the tab order and the accessibility tree, which opacity/pointer-
-   events alone would not (criterion 3). No transition on any of these three
-   rules — see the file banner. */
-:root.envelope-open .seal {
-  display: none;
-}
-
-:root.envelope-open .envelope-half--top {
-  transform: translateY(calc(-1 * var(--seal-clear)));
-}
-
-:root.envelope-open .envelope-half--bottom {
   transform: translateY(var(--seal-clear));
 }
