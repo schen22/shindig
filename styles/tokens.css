@@ -108,16 +108,27 @@
    is flagged in the Wave 1b report.
    ------------------------------------------------------------------------- */
 :root {
-  /* secondary text */
+  /* --t-muted — TEXT. All secondary text, without exception. Measures
+     5.61–8.40 against bg across every theme and both modes at 72% ink on bg
+     — clears AA's 4.5 everywhere (Stage 3, tests/contrast.js). */
   --t-muted: color-mix(in srgb, var(--t-ink) 72%, var(--t-bg));
 
-  /* labels, captions */
+  /* --t-faint — DECORATIVE ONLY. Never carries text (enforced: no `color:`
+     in this project may resolve to it — tests/contrast.js fails the build
+     otherwise). At 56% ink on bg this measures 3.50–3.65 in light mode
+     against AA's 4.5, which is exactly why it must stay off text. Raising
+     the percentage to clear AA was considered and rejected (Stage 3): it
+     clears by only 0.03 in forest and collapses the gap between this token
+     and --t-muted, which exist to be visibly different. Right for a dot, a
+     ring or a divider — not for text. */
   --t-faint: color-mix(in srgb, var(--t-ink) 56%, var(--t-bg));
 
-  /* hairline borders */
+  /* --t-line — DECORATIVE. Hairline borders. Mixes with `transparent`, not
+     `--t-bg` — alpha compositing over an unknown ground, which is out of
+     scope for tests/contrast.js's opaque-hex model (Stage 3 NOT INCLUDED). */
   --t-line: color-mix(in srgb, var(--t-ink) 15%, transparent);
 
-  /* form outlines */
+  /* --t-rule — DECORATIVE. Form outlines. Same exemption as --t-line. */
   --t-rule: color-mix(in srgb, var(--t-ink) 40%, transparent);
 }
 
