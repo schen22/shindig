@@ -191,12 +191,33 @@
   pointer-events: none;
 }
 
+/* Both halves clear the viewport entirely, so the opening ends on an empty
+   field of --t-bg — the same colour /rsvp/ starts on. That match is what makes
+   the page swap invisible; a partial part (this was --seal-clear, ~80px) leaves
+   headline and tagline on screen at the moment of the swap and the cut shows.
+   102%, not 100%: the extra 2% covers subpixel rounding at the seam. */
 .envelope.is-opening .envelope-half--top {
   transition: transform var(--spin-lg) var(--ease-envelope);
-  transform: translateY(calc(-1 * var(--seal-clear)));
+  transform: translateY(-102%);
 }
 
 .envelope.is-opening .envelope-half--bottom {
   transition: transform var(--spin-lg) var(--ease-envelope);
-  transform: translateY(var(--seal-clear));
+  transform: translateY(102%);
+}
+
+/* The seam goes out on its own rather than riding the top half off screen —
+   otherwise a hairline tracks upward over a widening gap. */
+.envelope.is-opening .envelope-half--top::after {
+  transition: opacity var(--fade-sm) var(--ease-envelope);
+  opacity: 0;
+}
+
+/* Only while opening. A transform can extend an element's scrollable overflow,
+   so the bottom half moving down by 102% would otherwise pop a vertical
+   scrollbar mid-animation — a flicker of its own. Scoped to .is-opening rather
+   than sitting on .envelope permanently, because clipping the resting layout
+   would risk cutting text off at 200% zoom (WCAG 1.4.4 / 1.4.10). */
+.envelope.is-opening {
+  overflow: hidden;
 }
