@@ -24,6 +24,7 @@ titleKey: titleDetails
   <li><span class="detail-list__label">Bring</span> — Just yourself</li>
   <li><span class="detail-list__label">Wear</span> — Whatever you'd wear to a park</li>
   <li><span class="detail-list__label">Plus-ones</span> — Yeee, just make sure to specify in the form or give Sarah a head's up</li>
+  <li><span class="detail-list__label">Add to calendar</span> — <a href="/assets/details.ics">download the .ics</a> or <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=A+Shindig+Thingamajig&amp;dates=20260905T210000Z%2F20260906T010000Z&amp;details=Hang+out+with+Sarah+and+friends.+Details%3A+https%3A%2F%2Fshindig-thingamajig.netlify.app%2Fdetails%2F&amp;location=TBC+%E2%80%94+address+in+the+group+chat">add via Google Calendar</a></li>
 </ul>
 
 <figure class="detail-photo">
