@@ -189,9 +189,8 @@ deferred:
     note: >-
       RESOLVED. tokens.css claimed both controls shared a 360deg spin while
       toggle.css had always used 180deg. Sarah ruled 180deg correct
-      (2026-08-18); the comment was corrected. 6-theme-toggle.md still carries
-      the same stale "spin-360deg-and-fade" line under MOTION, two lines below
-      Sarah's own "but with a 180 degree transition" - escalated, hers to edit.
+      (2026-08-18); the comment was corrected. Sarah then fixed the matching
+      line in 6-theme-toggle.md. No toggle-360deg claim survives.
     decided: 2026-08-18
 
   - id: real-party-values
