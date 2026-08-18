@@ -1,0 +1,98 @@
+# Execution state only. Not a second copy of the product definition.
+# The orchestrator reads this first and writes it last.
+
+current_stage: 3
+
+stages:
+  - id: 0
+    name: scaffold
+    status: complete
+    merged: 60df7cd
+
+  - id: 1
+    name: colour-pipeline
+    status: complete
+    merged: c5c0e7c
+
+  - id: 2
+    name: type-base-css
+    status: complete
+    merged: c8cdecc
+
+  - id: 3
+    name: layer3-contrast
+    status: pending
+
+  - id: 4
+    name: themed-copy
+    status: pending
+
+  - id: 5
+    name: home-envelope
+    status: pending
+    group: features
+
+  - id: 6
+    name: theme-toggle
+    status: pending
+    group: features
+
+  - id: 7
+    name: rsvp-page
+    status: pending
+    group: features
+
+  - id: 8
+    name: details-page
+    status: pending
+    group: features
+
+  - id: 9
+    name: content-and-calendar
+    status: pending
+
+  - id: 10
+    name: launch
+    status: pending
+
+approved_decisions:
+  - Eleventy v3, ESM, Liquid templates; Markdown for /details
+  - Embedded Google Form; no backend, no database, no serverless functions
+  - Three pages only - Home, RSVP, Details
+  - Netlify Free, production branch main, no branch deploys
+  - One live party theme, switched at build in _data/site.js
+  - Colour exists only in _data/palettes.js; one palette ships
+  - No auth or password gate; robots.txt + noindex + _headers are the measures
+  - No CSP - the Google Forms iframe would need allowances Google changes without notice
+  - The repo does not track the Google Form's shape (no _data/form.js)
+  - One live party, no archive; past parties come down
+  - Layer-3 colour tokens take no fallback; --seal-size takes @supports (2026-08-17)
+  - --t-faint is decorative only and never carries text (2026-08-17)
+  - waxLit / waxDark are palette keys, not derived tokens (2026-08-17)
+  - Fonts - Fontsource latin subset, passthrough-copied from node_modules (2026-08-17)
+  - Expert panel is report-only; findings route to the file's owner
+  - Parallelism is for clean merges, not speed - coordination costs most of what
+    it saves on a site this size
+
+deferred:
+  - id: font-payload
+    note: >-
+      80.7 KB across three faces. Static-weight Fraunces (-18 KB) and character
+      subsetting (-26 KB) were both measured and declined. Revisit only if load
+      time becomes a concern. Reopening touches frozen files.
+    decided: 2026-08-17
+
+  - id: wordmarks-02-04
+    note: Themes 02-04 need their own wordmark. Needs Sarah.
+
+  - id: theme-toggle-on-home
+    note: >-
+      Absent from / by design, since / carries no chrome at all. Decided as
+      absent; revisit if it bothers you.
+
+  - id: real-party-values
+    note: >-
+      Stages 8 and 9 build on the mock set in full. Swapping in the real date,
+      venue, bring/wear/plus-ones and photo is a human step on Stage 10.
+
+last_approved_alpha: 06e1f9f

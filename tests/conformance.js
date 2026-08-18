@@ -1,4 +1,4 @@
-// tests/conformance.js — the rules in plans/CLAUDE.md that are mechanically
+// tests/conformance.js — the rules in CLAUDE.md and .claude/ that are mechanically
 // checkable, enforced rather than remembered (PRD §3.4.3, AGENTS.md §4.1).
 //
 // This project is built by several agents in parallel. A rule that lives only in
@@ -209,52 +209,50 @@ function extractFocusRule(text, label) {
   return dedent(text.slice(start, end + 1));
 }
 
-const PRD = path.join(ROOT, "plans", "CLAUDE.md");
+// The focus rule's normative copy lives in .claude/agents/implementer.md, which
+// is what an implementer is told to reproduce verbatim. It moved there from the
+// PRD when the PRD was dissolved into stage contracts and agent definitions; the
+// check is unchanged in substance — one selector list, stated once, enforced.
+const SPEC = path.join(ROOT, ".claude", "agents", "implementer.md");
 const BASE_CSS = path.join(ROOT, "styles", "base.css");
 
-const prdText = readFileSync(PRD, "utf8");
-// §4.6.2 only — the section from "### 4.6" up to the next "### ".
-const sectionStart = prdText.indexOf("### 4.6 ");
-const sectionEnd = prdText.indexOf("\n### ", sectionStart + 1);
-const section46 = prdText.slice(sectionStart, sectionEnd === -1 ? undefined : sectionEnd);
-const specRule = extractFocusRule(section46, "plans/CLAUDE.md §4.6.2");
+if (!existsSync(SPEC)) {
+  fail(
+    ".claude/agents/implementer.md is missing. It carries the normative focus rule " +
+      "that styles/base.css is checked against."
+  );
+}
 
-if (!specRule) {
-  fail("plans/CLAUDE.md §4.6.2 — could not find the focus rule to compare against.");
-} else if (!existsSync(BASE_CSS)) {
-  // styles/base.css belongs to Wave 1b, running in parallel with 1a (AGENTS.md §3).
+const specRule = existsSync(SPEC)
+  ? extractFocusRule(readFileSync(SPEC, "utf8"), ".claude/agents/implementer.md")
+  : null;
+
+if (existsSync(SPEC) && !specRule) {
+  fail(
+    ".claude/agents/implementer.md — could not find the focus rule to compare against. " +
+      "Everything focusable on the site depends on that one selector list."
+  );
+} else if (specRule && !existsSync(BASE_CSS)) {
   notices.push(
-    "check 5 SKIPPED: styles/base.css does not exist yet (Wave 1b owns it). The rule " +
-      "it must contain, byte for byte:\n" +
+    "check 5 SKIPPED: styles/base.css does not exist yet. The rule it must contain, " +
+      "byte for byte:\n" +
       specRule.split("\n").map((l) => "      " + l).join("\n")
   );
-} else {
+} else if (specRule) {
   const cssRule = extractFocusRule(readFileSync(BASE_CSS, "utf8"), "styles/base.css");
   if (!cssRule) {
     fail(
-      "styles/base.css — the global §4.6.2 focus rule is absent. Everything focusable " +
+      "styles/base.css — the global focus rule is absent. Everything focusable " +
         "on the site depends on this one selector list."
     );
   } else if (cssRule !== specRule) {
     fail(
-      "the §4.6.2 focus rule differs between plans/CLAUDE.md and styles/base.css " +
-        "(§3.4.3 requires them byte-identical after dedent):\n" +
-        `    plans/CLAUDE.md §4.6.2:\n${specRule.split("\n").map((l) => "      " + l).join("\n")}\n` +
+      "the focus rule differs between .claude/agents/implementer.md and " +
+        "styles/base.css (they must be byte-identical after dedent):\n" +
+        `    implementer.md:\n${specRule.split("\n").map((l) => "      " + l).join("\n")}\n` +
         `    styles/base.css:\n${cssRule.split("\n").map((l) => "      " + l).join("\n")}`
     );
   }
-}
-
-// The PRD states the rule twice — §4.6.2 and §8.3 — and requires it "verbatim
-// wherever it appears". A mismatch there is a spec contradiction to report, not an
-// agent's to fix (plans/CLAUDE.md is Sarah's), so it is a notice.
-const section83 = prdText.slice(prdText.indexOf("### 8.3"));
-const rule83 = extractFocusRule(section83, "plans/CLAUDE.md §8.3");
-if (specRule && rule83 && rule83 !== specRule) {
-  notices.push(
-    "plans/CLAUDE.md states the focus rule differently in §4.6.2 and §8.3. §4.6.2 is " +
-      "normative and is what styles/base.css is checked against. Escalate; do not edit the PRD."
-  );
 }
 
 // ── report ──────────────────────────────────────────────────────────────────
