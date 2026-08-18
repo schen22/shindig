@@ -5,11 +5,13 @@
 // handler below only ever intercepts, never replaces, the link. Split per
 // feature: no shared site.js (5-home-envelope.md NOT INCLUDED).
 //
-// This file does not read sessionStorage.getItem("envelopeOpened") — the
-// FROZEN inline script in _includes/base.liquid already does that, before
-// first paint, and sets the "envelope-open" class on <html> that
-// styles/components/envelope.css reads. This file only ever WRITES that key,
-// on the click that opens the envelope.
+// This file writes NO storage. It previously set sessionStorage
+// "envelopeOpened", which the FROZEN inline script in _includes/base.liquid
+// reads before first paint to add the "envelope-open" class. That persistence
+// was removed (Sarah, 2026-08-18): with the seal hidden in the opened state
+// and header and footer both suppressed on "/", a return visit left the page
+// with no route to /rsvp/ at all. The flag is now never set, so the frozen
+// read is always falsy and the envelope always renders closed.
 
 (function () {
   var seal = document.querySelector(".seal");
@@ -23,18 +25,6 @@
 
     event.preventDefault();
 
-    // The animation and the navigation must not depend on storage succeeding:
-    // a denied write (Safari "Block All Cookies", Firefox with cookies
-    // blocked) throws SecurityError, and unguarded that would stop dead here
-    // — after preventDefault, before the animation or setTimeout below ever
-    // run, leaving the only route off "/" doing nothing on click. Denied
-    // storage just means the envelope re-animates next visit instead of
-    // remembering.
-    try {
-      sessionStorage.setItem("envelopeOpened", "1");
-    } catch (e) {
-      // Storage denied — session-only, as above.
-    }
     envelope.classList.add("is-opening");
 
     // Invisible must not mean focusable: the seal starts fading/spinning
