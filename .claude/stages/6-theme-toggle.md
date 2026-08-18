@@ -39,7 +39,7 @@ has one motion signature rather than two:
 --fade-sm: 300ms; /* the toggle */
 ```
 
-Same curve, same spin-360°-and-fade. The shorter pair exists because the seal's
+Same curve, spin-180°-and-fade. The shorter pair exists because the seal's
 timing on a 17px glyph reads as lag rather than ceremony.
 
 **Both glyphs stay in the DOM**, stacked and absolutely positioned. Neither may

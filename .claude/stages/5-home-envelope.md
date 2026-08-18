@@ -10,8 +10,7 @@ opens into `/rsvp/`.
 - `src/index.liquid` is a Stage 0 stub linking to `/rsvp/`.
 - `styles/components/` does not exist.
 - `public/assets/js/` does not exist.
-- `base.liquid` already guards header and footer off `/` on `<html>` from
-  `sessionStorage`. **That script is frozen. Do not touch it.**
+- `base.liquid` already guards header and footer off `/`.
 
 ## END STATE
 
