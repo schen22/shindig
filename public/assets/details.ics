@@ -1,0 +1,15 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//A Shindig Thingamajig//EN
+CALSCALE:GREGORIAN
+BEGIN:VEVENT
+UID:shindig-2026-09-05@shindig-thingamajig.netlify.app
+DTSTAMP:20260816T000000Z
+DTSTART:20260905T210000Z
+DTEND:20260906T010000Z
+SUMMARY:A Shindig Thingamajig
+DESCRIPTION:Hang out with Sarah and friends. Details: https://shindig-thingamajig.netlify.app/details/
+LOCATION:TBC — address in the group chat
+URL:https://shindig-thingamajig.netlify.app/details/
+END:VEVENT
+END:VCALENDAR
