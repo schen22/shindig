@@ -19,19 +19,19 @@ export default {
   taskmaster: {
     wordmark: "TM",
     eyebrow: "Task #1",
-    headline: "Hang out with Sarah and friends",
-    subheadline: "Come through and have fun!",
+    headline: "Partake in a Shindig Thingamajig",
+    subheadline: "i.e. come and have fun!",
     tagline: "Sarah edition",
     sealLabel: "RSVP",
-    titleHome: "Task Briefing",
-    titleRsvp: "Submit Your Answer",
-    titleDetails: "The Rules",
-    calloutTitle: "Task Not Loading?",
+    titleHome: "RSVP",
+    titleRsvp: "Task #2: Reply",
+    titleDetails: "What to expect",
+    calloutTitle: "Hangout with awesome friends (i.e. me)",
     calloutBody:
-      "Even the best contestants hit technical difficulties. If the form's stuck, tap through to it directly below.",
+      " Respond when you get this, or latest by Sunday, 8/22 pl0x. If the form's stuck, there's a link to it directly below the embedded attempt lulz.",
     detailsIntro:
-      "Here's your task briefing. Read it once, read it twice, then just show up — that's most of the challenge.",
-    footerLine: "Comethru and play!! Inspired by Taskmaster UK",
+      "Good vibes. Honestly just show up and see what happens. This website is an entirely extra and unnecessary use of time and resources given I could've just sent the google form, but shhh. This all is kind of an experiment. Anyways, here's what to expect:",
+    footerLine: "Comethru and play!! Inspired by ",
     footerLinkText: "Taskmaster UK",
     footerLinkUrl: "https://www.taskmaster.tv/",
   },
@@ -77,7 +77,8 @@ export default {
       "If it's hiding, don't blow out the candles yet — just tap the direct link below and RSVP that way instead.",
     detailsIntro:
       "The important bits are all below — read through before you RSVP, then start counting down the days.",
-    footerLine: "Thanks for celebrating with us — see you when the candles are lit.",
+    footerLine:
+      "Thanks for celebrating with us — see you when the candles are lit.",
     footerLinkText: "the history of birthdays",
     footerLinkUrl: "https://en.wikipedia.org/wiki/Birthday",
   },
@@ -100,7 +101,8 @@ export default {
       "If the embed won't unfold like a picnic blanket, the direct link right below opens it just fine.",
     detailsIntro:
       "Everything you need to picture the day is right below — give it a read before the day arrives.",
-    footerLine: "Thanks for coming out to the grass with us — see you out there.",
+    footerLine:
+      "Thanks for coming out to the grass with us — see you out there.",
     footerLinkText: "the history of picnics",
     footerLinkUrl: "https://en.wikipedia.org/wiki/Picnic",
   },
