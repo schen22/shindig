@@ -23,8 +23,16 @@
   var root = document.documentElement;
   var media = window.matchMedia("(prefers-color-scheme: dark)");
 
+  function readStoredTheme() {
+    try {
+      return localStorage.getItem("theme");
+    } catch (e) {
+      return null;
+    }
+  }
+
   function effectiveTheme() {
-    var stored = localStorage.getItem("theme");
+    var stored = readStoredTheme();
     if (stored === "light" || stored === "dark") return stored;
     return media.matches ? "dark" : "light";
   }
@@ -42,14 +50,22 @@
 
   toggle.addEventListener("click", function () {
     var next = effectiveTheme() === "dark" ? "light" : "dark";
+    // The palette flip must not depend on storage succeeding: set it first,
+    // unconditionally, so a denied write (Safari "Block All Cookies",
+    // Firefox with cookies blocked) still leaves a working control — the
+    // theme flips for the session and simply doesn't persist.
     root.dataset.theme = next;
-    localStorage.setItem("theme", next);
+    try {
+      localStorage.setItem("theme", next);
+    } catch (e) {
+      // Storage denied — session-only, as above.
+    }
     syncLabel();
   });
 
   // No explicit choice stored — the OS preference still drives the label
   // (and, via toggle.css's media query, the icon and palette) live.
   media.addEventListener("change", function () {
-    if (!localStorage.getItem("theme")) syncLabel();
+    if (!readStoredTheme()) syncLabel();
   });
 })();
