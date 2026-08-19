@@ -32,8 +32,8 @@ everything else builds against, and a change here invalidates work in flight.
 
 `_includes/base.liquid` (including the inline `<head>` script) ·
 `_includes/header.liquid` · `_includes/footer.liquid` · `eleventy.config.js` ·
-`_data/site.js` · `_data/nav.js` · `package.json` · `netlify.toml` · `_headers` ·
-`public/robots.txt`
+`_data/site.js` · `_data/nav.js` · `package.json` · `netlify.toml` ·
+`public/_headers` · `public/robots.txt`
 
 Single-writer for a different reason: **`_data/palettes.js`** is the single
 source of colour. Two writers reintroduces exactly the drift the architecture

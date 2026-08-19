@@ -33,4 +33,4 @@ titleKey: titleDetails
        width="800" height="554" loading="lazy">
 </figure>
 
-<p class="last-updated">Last updated August 17, 2026.</p>
+<p class="last-updated">Last updated August 18, 2026.</p>

@@ -33,7 +33,7 @@ or copy it.
 
 Frozen, uneditable by anyone including the original author: `_includes/base.liquid` ·
 `header.liquid` · `footer.liquid` · `eleventy.config.js` · `_data/site.js` ·
-`_data/nav.js` · `package.json` · `netlify.toml` · `_headers` ·
+`_data/nav.js` · `package.json` · `netlify.toml` · `public/_headers` ·
 `public/robots.txt` · `_data/palettes.js`
 
 Full rules, including the two files that legitimately appear twice, are in
