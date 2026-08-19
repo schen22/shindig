@@ -431,4 +431,29 @@ deferred:
       post-merge block is the place it gets verified on a real response.
     decided: 2026-08-18
 
-last_approved_alpha: 3f1ce2d
+  - id: details-photo-licensing
+    note: >-
+      NEEDS SARAH, AND IT IS THE LAST NON-TECHNICAL SHIP ITEM.
+      public/assets/images/taskmaster_uk_16_01_framed.jpg composites a
+      Getty/iStock frame with a Taskmaster UK still, and src/details.md:31
+      serves it from a page that becomes publicly reachable the moment main
+      deploys. Stripping the metadata removed the marker, not the question.
+      Raised to Sarah during Stage 8 and recorded only in
+      orchestrator_memory.json's open_for_sarah, never here - which is why it
+      survived the Stage 10 walkthrough unexamined. Recorded properly now.
+      Nothing in the build can answer this; it is a rights question, not a
+      defect. Options are: keep it and accept the exposure, swap in an image
+      Sarah owns, or drop the figure from /details.
+    decided: 2026-08-18
+    raised_by: orchestrator_memory carry-over
+
+  - id: human-items-cleared
+    note: >-
+      RESOLVED 2026-08-18. Sarah confirmed both Stage 10 [human] criteria are
+      done: a test response landed in the private Sheet and the Sheet is still
+      private, and closing the Form on the deadline is handled. Neither blocks
+      launch any longer.
+    decided: 2026-08-18
+    resolved: 2026-08-18
+
+last_approved_alpha: 1084479
