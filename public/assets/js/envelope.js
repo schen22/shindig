@@ -81,4 +81,27 @@
     // schedule: it only ever runs when the event did not.
     setTimeout(go, 1200);
   });
+
+  // Coming BACK to "/" (Stage 12). The opening state was left on deliberately —
+  // the page navigates away, so there is nothing to reset. That holds going
+  // forward and fails coming back: a back navigation is served from the
+  // browser's back/forward cache, which restores this DOM exactly as it was
+  // left. Without the reset below, "/" returns with both halves still
+  // translated off-viewport and the seal at opacity 0 with pointer-events
+  // none — and "/" carries no header, no footer and no nav, so what the
+  // visitor gets is a blank field with no route anywhere. That is the same
+  // dead end the sessionStorage flag was withdrawn for on 2026-08-18, arriving
+  // through a different door.
+  //
+  // Unconditional rather than branching on event.persisted: on an ordinary
+  // load the class is absent and the attribute unset, so both calls do
+  // nothing, and pageshow fires only at load or restore — never mid-click.
+  //
+  // No counter-spin to guard against: the transitions are declared INSIDE
+  // .envelope.is-opening (envelope.css:187, 199, 204, 211), so dropping the
+  // class drops the transitions with the transforms and the revert is instant.
+  window.addEventListener("pageshow", function () {
+    envelope.classList.remove("is-opening");
+    seal.removeAttribute("tabindex");
+  });
 })();
