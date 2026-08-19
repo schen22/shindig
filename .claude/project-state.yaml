@@ -174,7 +174,12 @@ deferred:
       ran on Sonnet. Sarah ruled on 2026-08-18 that the expert panel runs on
       Sonnet; the per-agent code-reviewer is still unruled and has been
       dispatched on Opus throughout Stages 4-7.
+      RESOLVED 2026-08-18: Sarah ruled the per-stage code-reviewer runs on Opus,
+      panel stays on Sonnet. Stage 11's L1 was dispatched under that ruling.
+      code-reviewer.md still reads "model: sonnet" and is the remaining stale
+      line; correcting it is a docs change no current stage owns.
     decided: 2026-08-17
+    resolved: 2026-08-18
 
   - id: rsvp-callout-duplication
     note: >-
@@ -309,7 +314,10 @@ deferred:
       user activates the link, no target=_blank. But the WEAKER case (a
       same-origin prefetch) got a recorded decision on 2026-08-18, so this one
       should too. One line in approved_decisions closes it.
+      RESOLVED 2026-08-18: Sarah approved it as a bounded exception. Recorded in
+      approved_decisions; the link stays as Stage 9 shipped it.
     decided: 2026-08-18
+    resolved: 2026-08-18
     raised_by: L1 code-reviewer
 
   - id: ics-description-unfolded
