@@ -1,7 +1,7 @@
 # Execution state only. Not a second copy of the product definition.
 # The orchestrator reads this first and writes it last.
 
-current_stage: 10
+current_stage: 11
 
 stages:
   - id: 0
@@ -57,6 +57,10 @@ stages:
     name: content-and-calendar
     status: complete
     merged: dcb623d
+
+  - id: 11
+    name: launch-blockers
+    status: pending
 
   - id: 10
     name: launch
