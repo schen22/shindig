@@ -60,7 +60,14 @@ stages:
 
   - id: 11
     name: launch-blockers
-    status: pending
+    status: complete
+    merged: 3f1ce2d
+    note: >-
+      Both Stage 10 defects cleared. L1 review (Opus) returned SHIP with three
+      minors, all in tests/output.js. Two were applied in-branch by the
+      ORCHESTRATOR, not the implementer - see one-writer-exception-stage-11
+      under deferred. The third was declined as contract-barred and is recorded
+      as headers-guard-is-artifact-only.
 
   - id: 10
     name: launch
@@ -71,6 +78,11 @@ stages:
       since Stage 10 NOT INCLUDED bars fixing in place: headers-not-deployed
       and details-last-updated-stale. Launch is blocked on those plus the
       [human] items, chiefly real-party-values.
+      Both defects were cleared by Stage 11 (3f1ce2d). Stage 10 now needs a
+      RE-WALK of the two failed criteria, and its post-merge block still cannot
+      be walked until Sarah merges alpha to main - there is no preview deploy.
+      Remaining [human] items: the test response into the private Sheet, and
+      closing the Form on the deadline.
 
 approved_decisions:
   - Eleventy v3, ESM, Liquid templates; Markdown for /details
@@ -101,6 +113,15 @@ approved_decisions:
   - The envelope navigates when the opening finishes, not on a timer and not at
     click time - Sarah's call (2026-08-18). Both halves clear the viewport, so
     the swap lands on a flat --t-bg field identical to /rsvp/'s ground.
+  - The calendar.google.com template link on /details is an allowed exception to
+    "any other external origin, anywhere, is out of scope" - Sarah's call
+    (2026-08-18). Bounded on the same grounds as the same-origin prefetch:
+    nothing loads from that origin, no request is made until a guest activates
+    the link, and there is no target=_blank. Closes calendar-google-origin.
+  - The per-stage code-reviewer runs on Opus - Sarah's call (2026-08-18),
+    matching 06e1f9f and how Stages 4-7 were actually dispatched. The expert
+    panel stays on Sonnet. code-reviewer.md's "model: sonnet" line is now the
+    stale one. Closes reviewer-model-drift.
   - No page-entry fade on /rsvp/ - considered and dropped (2026-08-18). Scoping
     it to that one page needed either a wrapper element in Stage 7's template
     or :has(), which shipped in Firefox 121 and breaks the 113 floor.
@@ -217,7 +238,12 @@ deferred:
       footer.liquid:8-10 states the origin is the secret this project protects.
       Fix is to move the file to public/_headers; verify _site/_headers exists
       after a build. Needs its own stage.
+      RESOLVED 2026-08-18 in 3f1ce2d (Stage 11). File moved to public/_headers,
+      cmp against _site/_headers silent, and tests/output.js now fails the build
+      if it stops arriving. NOT yet verified on a real response - that check
+      lives in 10-launch.md's post-merge block and needs the live site.
     decided: 2026-08-18
+    resolved: 3f1ce2d
     raised_by: Stage 10 walkthrough
 
   - id: details-last-updated-stale
@@ -228,7 +254,11 @@ deferred:
       line on /details reflects today". Nothing regenerates this string - it is
       hand-written, so it will go stale again on the next content edit. Worth
       deciding whether it becomes a build-time date or stays by hand.
+      RESOLVED 2026-08-18 in 3f1ce2d (Stage 11) - corrected to August 18, 2026.
+      Still hand-written, so it will go stale again on the next content edit;
+      whether it becomes a build-time value remains undecided.
     decided: 2026-08-18
+    resolved: 3f1ce2d
     raised_by: Stage 10 walkthrough
 
   - id: stage10-second-visit-criterion-obsolete
@@ -300,4 +330,75 @@ deferred:
       Accepted consequence: the .ics presents as a firm calendar event a date
       the page itself only proposes. Swap in real values whenever they exist.
 
-last_approved_alpha: 8498e02
+  - id: headers-guard-is-artifact-only
+    note: >-
+      tests/output.js checks _site/_headers but never public/_headers. _site is
+      not cleaned between builds, so a warm local tree keeps a stale copy and
+      the guard passes even after public/_headers is deleted. Netlify builds
+      from a clean checkout, so PRODUCTION IS PROTECTED and this is a local
+      signal problem only. Declined at Stage 11 rather than fixed: the contract
+      specified the _site assertion and said "Keep it to that". One line
+      asserting the source file closes it whenever tests/output.js next opens.
+    decided: 2026-08-18
+    raised_by: L1 code-reviewer
+
+  - id: one-writer-exception-stage-11
+    note: >-
+      The orchestrator wrote tests/output.js - a worker-owned file - to apply
+      two L1 minors (misleading second failure message; the new check absent
+      from the file's own enumeration, report line and PASS string). The
+      implementer agent type was withdrawn mid-stage and its instance was gone,
+      so the findings had no owner to route back to. Sarah authorised the
+      exception on 2026-08-18. No collision was possible with the owner gone.
+      Recorded because the one-writer rule is otherwise absolute.
+    decided: 2026-08-18
+
+  - id: frozen-list-named-the-old-headers-path
+    note: >-
+      RESOLVED 2026-08-18. review-bindings.md:36 and parallel-execution.md:35
+      both froze `_headers` at the repository root, a path Stage 11 removed.
+      Both are orchestrator-owned; both now name public/_headers.
+    decided: 2026-08-18
+    resolved: 2026-08-18
+    raised_by: L1 code-reviewer
+
+  - id: stage-11-merged-onto-main-in-error
+    note: >-
+      INCIDENT, REVERTED. The primary worktree was switched from alpha to main
+      by another actor at 17:37 while Stage 11 was in review (reflog HEAD@{3}).
+      The orchestrator's merge therefore landed on main - the one thing CLAUDE.md
+      forbids - as df0a50d. Caught immediately, never pushed, and undone with
+      git reset --hard 573b91d, which restored main exactly as the other actor
+      left it. Stage 11 was then merged to alpha as 3f1ce2d from a temporary
+      worktree, leaving the primary worktree's branch untouched. Lesson: the
+      orchestrator must verify the checked-out branch immediately before every
+      merge, not once at the start of a stage. A shared worktree is not a
+      stable assumption while peer sessions are live.
+    decided: 2026-08-18
+
+  - id: main-drops-node-env-production
+    note: >-
+      NEEDS SARAH. 573b91d on main removes NODE_ENV = "production" from
+      netlify.toml and comments "deliberately NOT set here, and must not be
+      re-added". Committed on main only; alpha still sets it. eleventy.config.js
+      gates minification on NODE_ENV, so as written the live site would ship
+      unminified CSS (37.5 KB against 11.5 KB measured at Stage 11). Not the
+      orchestrator's file and not this stage's scope - reported, not touched. If
+      the removal is deliberate, it needs a recorded decision and the §3.3
+      minification claim in the docs has to change with it. If it was a stray
+      edit made while testing the launch, it should come out before the next
+      deploy of main.
+    decided: 2026-08-18
+
+  - id: live-main-predates-the-headers-fix
+    note: >-
+      origin/main is cbff824 ("merge in alpha changes to test launch",
+      2026-08-18 17:37), which is alpha at 44b0125 - BEFORE Stage 11. Netlify
+      deploys main on push, so whatever is live was built with _headers at the
+      repository root and is serving no Referrer-Policy and no
+      X-Content-Type-Options. Stage 11 fixes this on alpha; the live site does
+      not have the fix until Sarah merges alpha to main by hand. Stage 10's
+      post-merge block is the place it gets verified on a real response.
+    decided: 2026-08-18
+
+last_approved_alpha: 3f1ce2d
