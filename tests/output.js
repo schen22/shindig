@@ -1,10 +1,11 @@
 // tests/output.js — what actually reached _site/ (PRD §3.4.5, AGENTS.md §4.1).
 //
-// Four claims, none of which is visible in the source:
+// Five claims, none of which is visible in the source:
 //   1. Exactly ONE palette is in the built site.css (§4.4)
 //   2. Minified in production, readable in development (§3.3)
 //   3. The three faces are present, and Fraunces is preloaded (§4.8)
 //   4. Each face is under 50 KB — the -full- trap (§3.4.5, §4.8)
+//   5. _headers reached _site and still carries Referrer-Policy (Stage 11)
 //
 // Check 4 exists because both files render correctly. Fontsource's `-full-` infix
 // means the full VARIABLE AXIS set (opsz+wght+soft+wonk), not the full character
@@ -169,6 +170,40 @@ for (const page of PAGES) {
   }
 }
 
+// ── 5 · _headers reached the publish directory ──────────────────────────────
+//
+// Netlify reads `_headers` from the publish directory (`_site`, netlify.toml)
+// only if it is passed through by eleventy.config.js — which passes through
+// `public/`, not the repository root. A `_headers` anywhere else is silently
+// never deployed and never applied.
+const HEADERS_FILE = path.join(SITE, "_headers");
+const REQUIRED_DIRECTIVE = "Referrer-Policy: no-referrer";
+
+let headersNote;
+
+if (!existsSync(HEADERS_FILE)) {
+  headersNote = "MISSING from _site";
+  fail(
+    "_site/_headers is missing. _headers must live in public/, not the " +
+      "repository root, or Eleventy's passthrough copy never reaches _site."
+  );
+} else {
+  const headers = readFileSync(HEADERS_FILE, "utf8");
+  if (headers.includes(REQUIRED_DIRECTIVE)) {
+    headersNote = `reached _site with "${REQUIRED_DIRECTIVE}"`;
+  } else {
+    // The file DID reach _site, so its location is not the problem here —
+    // saying otherwise sends the next reader to the wrong place. Someone
+    // edited the contents.
+    headersNote = `reached _site, but "${REQUIRED_DIRECTIVE}" is gone`;
+    fail(
+      `_site/_headers reached the publish directory but no longer contains ` +
+        `"${REQUIRED_DIRECTIVE}". The directive was removed from ` +
+        "public/_headers; restore it there."
+    );
+  }
+}
+
 // ── report ──────────────────────────────────────────────────────────────────
 console.log(`tests/output.js — built site.css ${kb(built.length)}, theme "${liveName}"`);
 console.log(`  one palette      ${liveValues.size} live values present, 0 from the other ${Object.keys(palettes).length - 1} themes`);
@@ -178,6 +213,7 @@ for (const [face, bytes] of faceSizes) {
 }
 const total = [...faceSizes.values()].reduce((a, b) => a + b, 0);
 console.log(`  font payload     ${kb(total)} for ${faceSizes.size} faces`);
+console.log(`  _headers         ${headersNote}`);
 
 if (failures.length) {
   console.error(`\nFAIL — ${failures.length} output assertion(s):`);
@@ -185,4 +221,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log("PASS — one palette, minified in production, three faces present and under ceiling.");
+console.log("PASS — one palette, minified in production, three faces present and under ceiling, _headers deployed.");
