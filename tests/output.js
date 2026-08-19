@@ -169,6 +169,30 @@ for (const page of PAGES) {
   }
 }
 
+// ── 5 · _headers reached the publish directory ──────────────────────────────
+//
+// Netlify reads `_headers` from the publish directory (`_site`, netlify.toml)
+// only if it is passed through by eleventy.config.js — which passes through
+// `public/`, not the repository root. A `_headers` anywhere else is silently
+// never deployed and never applied.
+const HEADERS_FILE = path.join(SITE, "_headers");
+const REQUIRED_DIRECTIVE = "Referrer-Policy: no-referrer";
+
+if (!existsSync(HEADERS_FILE)) {
+  fail(
+    "_site/_headers is missing. _headers must live in public/, not the " +
+      "repository root, or Eleventy's passthrough copy never reaches _site."
+  );
+} else {
+  const headers = readFileSync(HEADERS_FILE, "utf8");
+  if (!headers.includes(REQUIRED_DIRECTIVE)) {
+    fail(
+      `_site/_headers is missing "${REQUIRED_DIRECTIVE}". _headers must live in ` +
+        "public/, not the repository root, or it never reaches _site."
+    );
+  }
+}
+
 // ── report ──────────────────────────────────────────────────────────────────
 console.log(`tests/output.js — built site.css ${kb(built.length)}, theme "${liveName}"`);
 console.log(`  one palette      ${liveValues.size} live values present, 0 from the other ${Object.keys(palettes).length - 1} themes`);
