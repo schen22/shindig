@@ -30,10 +30,10 @@ export default {
     calloutBody:
       " Respond when you get this, or latest by Sunday, 8/22 pl0x. If the form's stuck, there's a link to it directly below the embedded attempt lulz.",
     detailsIntro:
-      "Good vibes. Honestly just show up and see what happens. This website is an entirely extra and unnecessary use of time and resources given I could've just sent the google form, but shhh. This all is kind of an experiment. Anyways, here's what to expect:",
-    footerLine: "Comethru and play!! Inspired by ",
-    footerLinkText: "Taskmaster UK",
-    footerLinkUrl: "https://www.taskmaster.tv/",
+      "Good vibes. Honestly just show up and see what happens. This website is an entirely extra and unnecessary use of time and resources given I could've just sent the google form, but shhh. Anyways, here's what to expect:",
+    footerLine: "Made with bots and healthy skepticism.",
+    footerLinkText: "Sauce",
+    footerLinkUrl: "https://github.com/schen22/shindig",
   },
 
   // ── 02 · Forest bathing ──────────────────────────────────────────────────
