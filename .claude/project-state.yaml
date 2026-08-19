@@ -160,6 +160,17 @@ approved_decisions:
     both sheets and fails the build if the unminified one reached _site, so the
     silent version of this cannot ship. NPM_FLAGS="--include=dev" would also
     work and was rejected as a second moving part that re-arms the trap.
+  - The footer's github.com source link stays, and the repository stays public -
+    Sarah's call (2026-08-18), asked and answered explicitly. Accepted with the
+    consequence stated: /details links guests to github.com/schen22/shindig
+    (confirmed publicly readable, HTTP 200 unauthenticated), which hands them
+    the whole .claude/ tree - this state file included, and with it the
+    details-photo-licensing note about the Getty/iStock frame. A new external
+    origin in the footer, ruled the same way calendar.google.com was.
+  - The Eagle Park maps short link is deliberately NOT on the page or in the
+    calendar entries - Sarah's call (2026-08-18). "Eagle Park, Mountain View,
+    CA" geocodes on its own in both Google Calendar and any .ics client, so the
+    link would add a maps.app.goo.gl origin and buy nothing.
   - No page-entry fade on /rsvp/ - considered and dropped (2026-08-18). Scoping
     it to that one page needed either a wrapper element in Stage 7's template
     or :has(), which shipped in Firefox 121 and breaks the 113 floor.
@@ -508,6 +519,52 @@ deferred:
       animation on restore; same under prefers-reduced-motion. The build cannot
       check any of them. Walk them on the live site after the merge to main,
       alongside Stage 10's post-merge block - or locally against _site first.
+    decided: 2026-08-18
+
+  - id: location-set-to-eagle-park
+    note: >-
+      2026-08-18. The party location became "Eagle Park, Mountain View, CA"
+      (short link resolves to 37.3891455,-122.08623). Sarah hand-edited the
+      /details Where row and the .ics LOCATION on main; the orchestrator did the
+      third copy - the Google Calendar link's location= param, which nothing
+      guards - and fixed two things in the .ics:
+        - the commas were UNESCAPED. Commas are structural in an iCalendar TEXT
+          value, so "Eagle Park, Mountain View, CA" parses as a three-valued
+          list and most clients show only "Eagle Park". Now
+          "Eagle Park\, Mountain View\, CA". This is exactly what
+          ics-text-escaping-at-stage-10 predicted, on the first real edit.
+        - added SEQUENCE:1. Without it a client that already holds the event
+          treats a re-imported file with the same UID as unchanged and the new
+          location never lands.
+      Note the two places need DIFFERENT escaping for the same string: \, in
+      the file, %2C in the URL. Third one-writer exception - the content-worker
+      agent type is withdrawn. Left uncommitted in Sarah's working tree because
+      she is editing main by hand; not merged, not pushed.
+    decided: 2026-08-18
+
+  - id: footer-rewrite-open
+    note: >-
+      OPEN, AND IT FAILS THE BUILD. Sarah's uncommitted footer work comments out
+      footerLine / footerLinkText / footerLinkUrl for the taskmaster theme in
+      _data/themes.js and hardcodes the line in _includes/footer.liquid.
+      tests/copy.js requires all 15 keys in every theme, so `npm run build`
+      fails with three copy-contract violations and Netlify would fail the
+      deploy identically. The consistent fix is to drop those three from
+      REQUIRED_KEYS in tests/copy.js AND from all four themes, not just the live
+      one. Also: _includes/footer.liquid is on the frozen list
+      (review-bindings.md:36), so the override wants a recorded decision.
+      Not actioned - Sarah is mid-edit in those files.
+    decided: 2026-08-18
+
+  - id: content-lands-on-main-by-hand
+    note: >-
+      Sarah is editing content directly on main now rather than through alpha:
+      the Where row, the .ics LOCATION and the footer rewrite were all made in
+      the primary worktree on main. That is her prerogative - main is hers - but
+      it means alpha no longer holds everything, and the orchestrator's rule
+      that alpha is the integration branch does not describe reality. Merge main
+      back into alpha after each hand-edit, or stop treating alpha as the source
+      of truth for content. Whichever, the two should not silently diverge.
     decided: 2026-08-18
 
 last_approved_alpha: d9604f4
