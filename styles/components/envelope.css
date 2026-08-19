@@ -177,9 +177,13 @@
 }
 
 /* ── Opening — transient, JS-driven ──────────────────────────────────────────
-   envelope.js adds .is-opening on click and never removes it: the page
-   navigates away before removal would matter, so there is no reverse
-   transition to guard against (criterion 6, "no counter-spin on reset").
+   envelope.js adds .is-opening on click and removes it in one place only: a
+   pageshow handler, for the back/forward-cache restore that hands "/" back
+   with this state still applied (Stage 12). Nothing removes it while the page
+   is live, so there is still no reverse transition to guard against
+   (criterion 6, "no counter-spin on reset") — and none on restore either,
+   because the transitions below are declared inside this selector and go with
+   the class.
    prefers-reduced-motion collapses these durations to 0.01ms globally
    (styles/base.css) — nothing component-specific is needed here for that.
    envelope.js navigates on this rule's transitionend, so that collapse also
