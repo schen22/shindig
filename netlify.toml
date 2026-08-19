@@ -6,8 +6,7 @@
   publish = "_site"
 
 [build.environment]
-  # §3.3 gates minification on this. Get it wrong and unminified CSS ships silently.
-  NODE_ENV = "production"
+  # NODE_ENV is deliberately NOT set here, and must not be re-added.
   NODE_VERSION = "20"
 
 [context.production]
