@@ -544,17 +544,19 @@ deferred:
 
   - id: footer-rewrite-open
     note: >-
-      OPEN, AND IT FAILS THE BUILD. Sarah's uncommitted footer work comments out
-      footerLine / footerLinkText / footerLinkUrl for the taskmaster theme in
-      _data/themes.js and hardcodes the line in _includes/footer.liquid.
-      tests/copy.js requires all 15 keys in every theme, so `npm run build`
-      fails with three copy-contract violations and Netlify would fail the
-      deploy identically. The consistent fix is to drop those three from
-      REQUIRED_KEYS in tests/copy.js AND from all four themes, not just the live
-      one. Also: _includes/footer.liquid is on the frozen list
-      (review-bindings.md:36), so the override wants a recorded decision.
-      Not actioned - Sarah is mid-edit in those files.
+      RESOLVED 2026-08-18 by Sarah, correctly and without help. An intermediate
+      version hardcoded the footer line in the FROZEN _includes/footer.liquid
+      and commented the three footer keys out of _data/themes.js, which failed
+      tests/copy.js on three missing keys and would have failed the Netlify
+      deploy the same way. She reverted the frozen file and put the content in
+      the theme keys instead - footerLine "Made with bots and healthy
+      skepticism.", footerLinkText "Sauce", footerLinkUrl the repo - so the
+      single source of truth holds, all 15 keys are present, the frozen file is
+      untouched and the existing rel="noreferrer" anchor carries the link.
+      Build passes. No decision needed about overriding a frozen file, because
+      in the end nothing overrode one.
     decided: 2026-08-18
+    resolved: 2026-08-18
 
   - id: content-lands-on-main-by-hand
     note: >-
