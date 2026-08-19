@@ -1,0 +1,303 @@
+# Execution state only. Not a second copy of the product definition.
+# The orchestrator reads this first and writes it last.
+
+current_stage: 11
+
+stages:
+  - id: 0
+    name: scaffold
+    status: complete
+    merged: 60df7cd
+
+  - id: 1
+    name: colour-pipeline
+    status: complete
+    merged: c5c0e7c
+
+  - id: 2
+    name: type-base-css
+    status: complete
+    merged: c8cdecc
+
+  - id: 3
+    name: layer3-contrast
+    status: complete
+    merged: f9d385d
+
+  - id: 4
+    name: themed-copy
+    status: complete
+    merged: 59da394
+
+  - id: 5
+    name: home-envelope
+    status: complete
+    group: features
+    merged: 30fc35e
+
+  - id: 6
+    name: theme-toggle
+    status: complete
+    group: features
+    merged: ab6f9e2
+
+  - id: 7
+    name: rsvp-page
+    status: complete
+    group: features
+    merged: dd81c99
+
+  - id: 8
+    name: details-page
+    status: complete
+    group: features
+    merged: 1a00518
+
+  - id: 9
+    name: content-and-calendar
+    status: complete
+    merged: dcb623d
+
+  - id: 11
+    name: launch-blockers
+    status: pending
+
+  - id: 10
+    name: launch
+    status: walked-with-failures
+    note: >-
+      Every criterion recorded pass/fail/deferred on 2026-08-18 (the contract's
+      STOP condition). Two real defects found, both needing their own stage
+      since Stage 10 NOT INCLUDED bars fixing in place: headers-not-deployed
+      and details-last-updated-stale. Launch is blocked on those plus the
+      [human] items, chiefly real-party-values.
+
+approved_decisions:
+  - Eleventy v3, ESM, Liquid templates; Markdown for /details
+  - Embedded Google Form; no backend, no database, no serverless functions
+  - Three pages only - Home, RSVP, Details
+  - Netlify Free, production branch main, no branch deploys
+  - One live party theme, switched at build in _data/site.js
+  - Colour exists only in _data/palettes.js; one palette ships
+  - No auth or password gate; robots.txt + noindex + _headers are the measures
+  - No CSP - the Google Forms iframe would need allowances Google changes without notice
+  - The repo does not track the Google Form's shape (no _data/form.js)
+  - One live party, no archive; past parties come down
+  - Layer-3 colour tokens take no fallback; --seal-size takes @supports (2026-08-17)
+  - --t-faint is decorative only and never carries text (2026-08-17)
+  - waxLit / waxDark are palette keys, not derived tokens (2026-08-17)
+  - Fonts - Fontsource latin subset, passthrough-copied from node_modules (2026-08-17)
+  - Expert panel is report-only; findings route to the file's owner
+  - Expert panel runs on Sonnet - Sarah's call (2026-08-18), overriding the
+    Opus-for-reviewers line in 06e1f9f. Matches expert-reviewer.md as written.
+  - Parallelism is for clean merges, not speed - coordination costs most of what
+    it saves on a site this size
+  - envelope.js warms /rsvp/ with a same-origin fetch on click so the opening
+    covers the round trip - Sarah's call (2026-08-18). "The page fetches
+    nothing" governs external origins; this is our own page.
+  - The seal turns 360deg, the theme toggle 180deg - Sarah's call (2026-08-18),
+    resolving the panel's Important finding. The code was already 180deg; the
+    comments claiming parity were what was wrong.
+  - The envelope navigates when the opening finishes, not on a timer and not at
+    click time - Sarah's call (2026-08-18). Both halves clear the viewport, so
+    the swap lands on a flat --t-bg field identical to /rsvp/'s ground.
+  - No page-entry fade on /rsvp/ - considered and dropped (2026-08-18). Scoping
+    it to that one page needed either a wrapper element in Stage 7's template
+    or :has(), which shipped in Firefox 121 and breaks the 113 floor.
+
+deferred:
+  - id: font-payload
+    note: >-
+      80.7 KB across three faces. Static-weight Fraunces (-18 KB) and character
+      subsetting (-26 KB) were both measured and declined. Revisit only if load
+      time becomes a concern. Reopening touches frozen files.
+    decided: 2026-08-17
+
+  - id: wordmarks-02-04
+    note: Themes 02-04 need their own wordmark. Needs Sarah.
+
+  - id: theme-toggle-on-home
+    note: >-
+      Absent from / by design, since / carries no chrome at all. Decided as
+      absent; revisit if it bothers you.
+
+  - id: layer3-regex-shape
+    note: >-
+      tests/contrast.js discovers layer-3 tokens by regex over tokens.css, in
+      the one shape the ruling sanctions: var(--t-ink) N% against --t-bg or
+      transparent. A token mixing two non-ink colours would bypass the
+      classify-or-fail guard rather than trip it. No such token exists and
+      Stage 3 barred adding one. Revisit if layer 3 ever grows.
+    decided: 2026-08-17
+
+  - id: reviewer-model-drift
+    note: >-
+      06e1f9f recorded reviewers on Opus ("a reviewer that shares the builder's
+      blind spots is a rubber stamp with a budget"); bbdfcd5 dissolved AGENTS.md
+      into .claude/agents/ and wrote model: sonnet into code-reviewer.md and
+      expert-reviewer.md, dropping the decision. Stage 3's L1 review therefore
+      ran on Sonnet. Sarah ruled on 2026-08-18 that the expert panel runs on
+      Sonnet; the per-agent code-reviewer is still unruled and has been
+      dispatched on Opus throughout Stages 4-7.
+    decided: 2026-08-17
+
+  - id: rsvp-callout-duplication
+    note: >-
+      Stage 4's calloutTitle/calloutBody carry embed-fallback messaging, and
+      Stage 7 fixes a form-fallback paragraph saying the same thing verbatim —
+      /rsvp/ would state it twice. Stage 7 cannot fix it (themes.js is the
+      content-worker's). Retune the two lines, or have Stage 7 render no
+      callout. Not blocking: Sarah removed the edit-link requirement that made
+      this a contract conflict.
+    decided: 2026-08-17
+
+  - id: callout-key-arity
+    note: >-
+      Stage 8's deadline callout has no themed key of its own; one
+      calloutTitle/calloutBody pair cannot serve two pages with two meanings.
+      A sixteenth key needs tests/copy.js REQUIRED_KEYS changed, which no
+      current stage owns.
+    decided: 2026-08-17
+
+  - id: stage4-required-reading-gap
+    note: >-
+      Stage 4 mandated callout keys whose semantics lived only in Stage 7's
+      contract, which Stage 4 was barred from reading. The contract's design,
+      not the agent's judgment. Patch before adding another key.
+    decided: 2026-08-17
+
+  - id: envelope-navigation-listener
+    note: >-
+      RESOLVED 2026-08-18 in 361ea39. envelope.js now navigates on the top
+      half's transform transitionend, with a 1200ms ceiling for the case where
+      the transition never starts. Brought forward from the backlog because
+      setTimeout(..., 0) removed the opening animation outright.
+    decided: 2026-08-18
+    resolved: 361ea39
+
+  - id: envelope-open-contract-staleness
+    note: >-
+      5-home-envelope.md still describes the withdrawn persisted state - END
+      STATE says 'at ~900ms calls location.assign' and 'Second visit in the same
+      session renders with the doors already parted', and NOT INCLUDED bars
+      'writing the second-visit flag anywhere but sessionStorage'. Criterion 5
+      was removed by Sarah; these three lines were not. Escalated, not fixed.
+    decided: 2026-08-18
+
+  - id: panel-minor-findings
+    note: >-
+      Expert panel (Sonnet) on merged alpha, 2026-08-18, scored 92.1/100. Its
+      one Important finding (toggle 180deg vs comments claiming 360deg) was
+      ruled on by Sarah and is closed. Four minor items left open, none
+      blocking: redundant color: var(--t-primary) in three component files;
+      the toggle's default aria-label is momentarily wrong before first click
+      when the OS preference is dark; tests/output.js has no page-weight
+      budget, only a font-payload ceiling; the 900 magic number it flagged in
+      envelope.js is obsolete, resolved by 361ea39.
+    decided: 2026-08-18
+
+  - id: toggle-comment-drift
+    note: >-
+      RESOLVED. tokens.css claimed both controls shared a 360deg spin while
+      toggle.css had always used 180deg. Sarah ruled 180deg correct
+      (2026-08-18); the comment was corrected. Sarah then fixed the matching
+      line in 6-theme-toggle.md. No toggle-360deg claim survives.
+    decided: 2026-08-18
+
+  - id: headers-not-deployed
+    note: >-
+      BLOCKING FOR LAUNCH. _headers is tracked at the REPO ROOT, not in public/.
+      eleventy.config.js:11 passes through public/ -> "/", so robots.txt (which
+      IS in public/) reaches _site/robots.txt, but _headers never does - _site/
+      contains only assets, details, index.html, robots.txt, rsvp. Netlify
+      publishes _site, so Referrer-Policy: no-referrer and
+      X-Content-Type-Options: nosniff are NOT applied on the live site. This
+      fails two Stage 10 criteria directly. It matters more since Stage 9: the
+      new calendar.google.com link would hand Google the site address, and
+      footer.liquid:8-10 states the origin is the secret this project protects.
+      Fix is to move the file to public/_headers; verify _site/_headers exists
+      after a build. Needs its own stage.
+    decided: 2026-08-18
+    raised_by: Stage 10 walkthrough
+
+  - id: details-last-updated-stale
+    note: >-
+      src/details.md:36 reads "Last updated August 17, 2026" but the file was
+      changed on 2026-08-18 (Stage 9's calendar item, and Sarah's "TBD, aiming"
+      edit to the When line). Fails the Stage 10 criterion "The last updated
+      line on /details reflects today". Nothing regenerates this string - it is
+      hand-written, so it will go stale again on the next content edit. Worth
+      deciding whether it becomes a build-time date or stays by hand.
+    decided: 2026-08-18
+    raised_by: Stage 10 walkthrough
+
+  - id: stage10-second-visit-criterion-obsolete
+    note: >-
+      RESOLVED 2026-08-18. Sarah struck the "Second visit ... no visible snap"
+      criterion from 10-launch.md, matching the withdrawal of the sessionStorage
+      flag. No criterion anywhere still describes removed behaviour.
+    decided: 2026-08-18
+    raised_by: Stage 10 walkthrough
+
+  - id: calendar-url-drift
+    note: >-
+      The event date now lives in THREE places, not two: src/details.md prose,
+      public/assets/details.ics, and the Google Calendar template link's query
+      string in details.md. Nothing guards the third - grepped, no test in
+      tests/ references details.ics, calendar.google.com or DTSTART. Stage 10's
+      human updates the prose and the .ics, both agree, the build passes, and
+      the calendar link still writes the old date into the calendar of anyone
+      who clicks it rather than downloading. review-bindings.md:121 still calls
+      the pair "the repo's only by-hand agreement" and is now stale. Fix is a
+      ~15-line assertion in tests/conformance.js that dates= decodes to
+      DTSTART/DTEND and text/details/location match SUMMARY/DESCRIPTION/
+      LOCATION. Out of Stage 9's IN SCOPE; needs its own small stage.
+    decided: 2026-08-18
+    raised_by: L1 code-reviewer
+
+  - id: calendar-google-origin
+    note: >-
+      NEEDS SARAH'S RULING. Stage 9's contract mandates a calendar.google.com
+      template link (END STATE, criterion 4), while CLAUDE.md says "Any other
+      external origin, anywhere, is out of scope. Report it." Reported, not
+      picked, per CLAUDE.md's precedence rule. Reviewer's read, which I share:
+      genuinely fine - nothing loads from that origin, no request until the
+      user activates the link, no target=_blank. But the WEAKER case (a
+      same-origin prefetch) got a recorded decision on 2026-08-18, so this one
+      should too. One line in approved_decisions closes it.
+    decided: 2026-08-18
+    raised_by: L1 code-reviewer
+
+  - id: ics-description-unfolded
+    note: >-
+      DESCRIPTION is 102 octets; RFC 5545 3.1 says fold at 75. The bytes are
+      dictated by the contract's "THE FILE, EXACTLY" block and were reproduced
+      exactly, so this is the contract's to answer. Every mainstream client
+      accepts long unfolded lines; recommendation is to leave it. Recorded so
+      "RFC 5545, minimal" is not read as verified-conformant.
+    decided: 2026-08-18
+    raised_by: L1 code-reviewer
+
+  - id: ics-text-escaping-at-stage-10
+    note: >-
+      HAZARD FOR THE STAGE 10 HUMAN STEP. Commas are structural in an iCalendar
+      TEXT value. LOCATION is currently "TBC - address in the group chat" and is
+      clean, but a real address ("123 Example St, Oakland, CA") must be written
+      "123 Example St\, Oakland\, CA" in the .ics or parsers read it as
+      multi-valued and clients truncate at the first comma. Same for ; and \.
+      The calendar URL needs percent-encoding instead - a DIFFERENT rule for the
+      same value in the two places that must agree. Belongs written into
+      10-launch.md before anyone swaps the mock values.
+    decided: 2026-08-18
+    raised_by: L1 code-reviewer
+
+  - id: real-party-values
+    note: >-
+      NO LONGER BLOCKS LAUNCH. Sarah removed the [human] "real values have
+      replaced the mock set" criterion from 10-launch.md on 2026-08-18 and
+      reworded the .ics check to "the proposed date". The site ships with
+      "TBD, aiming Saturday, Sep 5 · 2pm PT" and an .ics for that date.
+      Accepted consequence: the .ics presents as a firm calendar event a date
+      the page itself only proposes. Swap in real values whenever they exist.
+
+last_approved_alpha: 8498e02

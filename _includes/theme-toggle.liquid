@@ -1,19 +1,33 @@
 {%- comment -%}
-  _includes/theme-toggle.liquid — PLACEHOLDER.
+  _includes/theme-toggle.liquid — Stage 6.
 
-  Wave 0 ships this file only so header.liquid's include resolves; a missing
-  include fails the build. Wave 2b OVERWRITES this file per PRD §4.7.3 and must
-  not touch the include line in header.liquid (AGENTS.md §3, Wave 0 exception 1).
+  A single two-state icon <button>: sun bound to light, crescent moon bound to
+  dark. Both glyphs stay in the DOM at all times, stacked and absolutely
+  positioned by toggle.css — neither is ever display:none, which is what lets
+  the outgoing glyph spin-and-fade out instead of vanishing.
 
-  It deliberately renders NOTHING. §4.7.3 is explicit that a toggle with no
-  working write path must be absent rather than dead — "rendering a control that
-  cannot do anything is worse than omitting it" — and public/assets/js/theme.js
-  does not exist until Wave 2b. The Wave 0 a11y gate also checks that nothing
-  invisible is focusable, which an inert placeholder button would fail.
+  Visibility is driven entirely by CSS, keyed off [data-theme] on <html> (and
+  prefers-color-scheme when no explicit choice has been made yet) — see
+  toggle.css. theme.js only ever flips that attribute and localStorage.theme;
+  it never swaps an icon directly, so the glyph shown can never drift out of
+  sync with the palette that's actually applied.
 
-  Wave 2b's replacement needs, per §4.7.3:
-    - a single two-state icon <button>, sun bound to light, crescent to dark
-    - both glyphs in the DOM, stacked and absolutely positioned, never display:none
-    - decorative SVG aria-hidden="true"; aria-label names the ACTION, not the state
-    - hidden entirely without the `js` class set by the §8.2 inline script
+  Hidden entirely without the `js` class — `html:not(.js) .theme-toggle` in
+  toggle.css. That class is added by the frozen inline script in base.liquid,
+  before first paint. A toggle with no working write path (theme.js is
+  `defer`red and hasn't run yet) must be absent, not dead.
+
+  aria-label names the NEXT action, not the current state — "Switch to dark
+  theme" is unambiguous in a way "Dark" is not. theme.js keeps it in sync with
+  the effective theme (explicit choice, or the OS preference) on load and on
+  every click.
 {%- endcomment -%}
+<button type="button" id="theme-toggle" class="theme-toggle" aria-label="Switch to dark theme">
+  <svg class="theme-toggle__icon theme-toggle__icon--sun" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+    <circle cx="12" cy="12" r="4.5"></circle>
+    <path d="M12 1.5v2.25M12 20.25v2.25M4.393 4.393l1.591 1.591M18.016 18.016l1.591 1.591M1.5 12h2.25M20.25 12h2.25M4.393 19.607l1.591-1.591M18.016 5.984l1.591-1.591"></path>
+  </svg>
+  <svg class="theme-toggle__icon theme-toggle__icon--moon" width="17" height="17" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
+    <path d="M20.354 15.354A9 9 0 0 1 8.646 3.646 9.003 9.003 0 1 0 20.354 15.354Z"></path>
+  </svg>
+</button>

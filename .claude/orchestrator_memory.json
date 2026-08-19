@@ -1,0 +1,319 @@
+{
+  "project_metadata": {
+    "project_name": "shindig-thingamajig",
+    "last_updated": "2026-08-18T05:20:00Z",
+    "version": "1.0.0",
+    "purpose": "Orchestrator-only ledger. Cross-stage learnings that would otherwise be rediscovered by each agent at full context cost. Workers never read this file; the orchestrator injects the relevant rule into a dispatch brief. Not a second copy of CLAUDE.md, the stage contracts, or project-state.yaml.",
+    "evidence_basis": "Stages 3-8 of this repository, one session. Sample sizes are small and stated per entry. Confidence scores are the orchestrator's judgement, not measured frequencies."
+  },
+  "global_rules_and_gotchas": [
+    {
+      "id": "GOTCHA-001",
+      "category": "javascript",
+      "rule": "localStorage and sessionStorage THROW SecurityError when storage is denied (Safari 'Block All Cookies', Firefox blocking cookies, some webviews) - they do not return null. Every access must sit in try/catch, and any state change that must happen anyway (a class toggle, a navigation) must sit OUTSIDE the try.",
+      "why_it_recurs": "The frozen reference implementation at _includes/base.liquid:43-47 demonstrates unguarded access and documents the key names but never mentions throwing. Stage 6's contract instructs agents to read that file 'for the read half of the contract', so the assumption propagates from a file nobody may correct. RESOLVED at source 2026-08-18: the reference now demonstrates the guard and says in a comment that storage throws, so agents reading it for 'the read half of the contract' inherit the correct pattern.",
+      "observed_instances": [
+        "_includes/base.liquid - FIXED in 95355bd, after Sarah unfroze it. Was the reference implementation the other two copied. Measured with localStorage stubbed to throw: pre-fix every load raised an uncaught SecurityError; post-fix none, js class set either way, data-theme correctly unset.",
+        "public/assets/js/theme.js - fixed in 896985b. Unguarded it left a visible, focusable, labelled toggle that did nothing on click.",
+        "public/assets/js/envelope.js - fixed in 956318c. Severe: the throw landed between preventDefault() and the navigation, killing the only route off '/' since base.liquid hides header and footer there."
+      ],
+      "observed_models": [
+        "claude-sonnet-5"
+      ],
+      "detected_by": "code-reviewer (claude-opus-5), twice; the second instance was found by the orchestrator by hand from a dying review's last line",
+      "confidence_score": 0.99,
+      "inject_into": [
+        "implementer"
+      ],
+      "inject_when": "the stage writes client JS or touches the theme/envelope storage seam",
+      "contract_root_cause": "The acceptance criteria that should catch this are scoped BY CAUSE, not by outcome. 6-theme-toggle.md AC1 says 'With JavaScript disabled, the toggle is absent, not dead' and 5-home-envelope.md AC1 says 'With JS disabled, the seal navigates'. Denied storage produces the identical symptom with JS ENABLED, so both criteria read as satisfied while the failure ships. Fix the contract, not just the code: 'never present-but-inert, whatever the cause - JS disabled, script failure, or denied storage.' That phrasing fails the original code and requires no agent to enumerate causes correctly.",
+      "status": "closed - all three call sites guarded; keep injecting, the platform fact still applies to new client JS"
+    },
+    {
+      "id": "GOTCHA-002",
+      "category": "liquid",
+      "rule": "A `{% assign %}` in a layout does NOT propagate into the page content it wraps. src/*.md and src/*.liquid render in a separate pass before being dropped into {{ content }}, so each must re-derive `{%- assign theme = themes[site.partyTheme] -%}` itself. base.liquid, header.liquid and footer.liquid each already do this.",
+      "why_it_matters": "The failure is SILENT - Liquid renders a missing key as an empty string, not an error. tests/copy.js asserts key presence, not that anything renders it, so the build stays green over a blank page.",
+      "observed_instances": [
+        "Stage 8: {{ theme.titleDetails }} rendered empty in src/details.md until the agent re-derived `theme` locally.",
+        "Related: detailsIntro was authored in all four themes at Stage 4 and rendered by nothing until Stage 8 was told to render it - green build, invisible copy, for four stages."
+      ],
+      "observed_models": [
+        "claude-sonnet-5"
+      ],
+      "confidence_score": 0.95,
+      "inject_into": [
+        "implementer",
+        "content-worker"
+      ],
+      "inject_when": "the stage writes a page body that consumes themed copy"
+    },
+    {
+      "id": "GOTCHA-003",
+      "category": "css",
+      "rule": "An element pinned to `top: 50%` of a flex container and clearance padding anchored to the boundary BETWEEN two flex children have different origins. With `flex: 1 1 50%` the boundary sits (Ht - Hb)/2 off the container midpoint whenever the two halves' content heights differ. Give the ornament, the rule and the clearance one shared origin.",
+      "why_it_recurs": "The arithmetic looks right in isolation and no automated gate renders geometry. npm run build passed at every step while the live theme overlapped by 3px at 768px and 9px at 1280px.",
+      "observed_instances": [
+        "Stage 5: seal overlapped the headline in the SHIPPING theme. Found only because the reviewer measured in headless Chrome instead of reasoning about the CSS."
+      ],
+      "observed_models": [
+        "claude-sonnet-5"
+      ],
+      "confidence_score": 0.9,
+      "inject_into": [
+        "implementer",
+        "code-reviewer"
+      ],
+      "inject_when": "the stage positions an element against a container while reserving space in its children"
+    },
+    {
+      "id": "GOTCHA-004",
+      "category": "testing",
+      "rule": "A check that measures a value the page does not actually use is worse than no check - it is a green light over a broken page. Verify the thing measured is the thing rendered.",
+      "observed_instances": [
+        "--t-faint shipped failing AA because the pair table listed palette colours and a DERIVED value never entered it (Stage 3 fixed this).",
+        "tests/contrast.js measures 'bg on primary (seal label)', but the label's real ground is a waxLit-dominant gradient mix, not --t-primary. Birthday 4.15 and picnic 4.07 in light mode - under AA, unseen by the gate. Deferred: taskmaster ships at 6.72 and 02-04's palettes await Sarah."
+      ],
+      "observed_models": [
+        "claude-sonnet-5"
+      ],
+      "confidence_score": 0.97,
+      "inject_into": [
+        "code-reviewer",
+        "expert-reviewer"
+      ],
+      "inject_when": "always"
+    },
+    {
+      "id": "GOTCHA-005",
+      "category": "privacy",
+      "rule": "public/ is published verbatim. Any committed image carries its EXIF, XMP and IPTC blocks to a public URL. Strip APP1 and APP13, keep APP2 (ICC) or colours shift.",
+      "observed_instances": [
+        "The details photo carried iStock/Getty credit blocks, a contributor ID, a 'Not Released' rights marker and GIMP EXIF - 4.8 KB. Introduced by the ORCHESTRATOR's own sips PNG->JPEG conversion, not by any agent. Stripped in 1991589.",
+        "CI has no image check at all. tests/output.js gates font faces only."
+      ],
+      "observed_models": [],
+      "confidence_score": 1.0,
+      "inject_into": [
+        "code-reviewer"
+      ],
+      "inject_when": "the diff adds a binary under public/"
+    },
+    {
+      "id": "GOTCHA-006",
+      "category": "process",
+      "rule": "When a contract mandates a key or field whose SEMANTICS live only in a file the agent may not read, the agent is compelled to guess and the defect is the contract's, not the agent's. Check REQUIRED READING covers the meaning of everything IN SCOPE mandates.",
+      "observed_instances": [
+        "Stage 4 had to write calloutTitle/calloutBody (tests/copy.js rejects empties) while REQUIRED READING excluded Stages 7 and 8, the only places callout semantics were recorded. The agent guessed and flagged the guess - correct conduct. Result was a near-deadlock for Stage 7, resolved by Sarah amending the contract."
+      ],
+      "observed_models": [
+        "claude-sonnet-5"
+      ],
+      "confidence_score": 0.92,
+      "inject_into": [
+        "orchestrator"
+      ],
+      "inject_when": "authoring or amending a stage contract"
+    },
+    {
+      "id": "GOTCHA-007",
+      "category": "process",
+      "rule": "A file's ownership window CLOSES at merge. If no later stage lists a path IN SCOPE, anything missing from it becomes permanent. Audit for gaps before merging, not after.",
+      "observed_instances": [
+        "src/rsvp.liquid had no h1 and no stage owns it after Stage 7. Caught by the reviewer during the pre-merge window; an h1 from the existing titleRsvp key was added in feab350.",
+        "The /rsvp/ callout can never receive callout styling: Stage 8 owns callout.css but cannot touch src/rsvp.liquid. Spans two owners, so neither may fix it. Deferred."
+      ],
+      "observed_models": [],
+      "confidence_score": 0.94,
+      "inject_into": [
+        "orchestrator",
+        "code-reviewer"
+      ],
+      "inject_when": "reviewing the last stage that owns a given path"
+    },
+    {
+      "id": "GOTCHA-008",
+      "category": "process",
+      "rule": "Mock values in a contract can name files that do not exist. The real asset supersedes the mock path; do not rename a real file to match a mock. Grant the unowned asset path to a stage explicitly - agents correctly refuse to create files outside IN SCOPE.",
+      "observed_instances": [
+        "Stage 8 reported PARTIAL rather than inventing public/assets/images/details-placeholder.jpg. Correct behaviour: it omitted the photo instead of shipping a 404 or CSS for a selector nothing uses."
+      ],
+      "observed_models": [
+        "claude-sonnet-5"
+      ],
+      "confidence_score": 0.9,
+      "inject_into": [
+        "orchestrator"
+      ],
+      "inject_when": "a stage reports a missing asset"
+    },
+    {
+      "id": "GOTCHA-009",
+      "category": "tooling",
+      "rule": "BSD sed (macOS) does not support \\| alternation in basic regex. It exits 0 and changes nothing, so the failure is silent. Use python3 for any multi-pattern edit, and always re-grep to confirm.",
+      "observed_instances": [
+        "A sealLabel replacement across four themes reported success and replaced nothing."
+      ],
+      "observed_models": [
+        "claude-opus-5"
+      ],
+      "confidence_score": 1.0,
+      "inject_into": [
+        "orchestrator",
+        "implementer"
+      ],
+      "inject_when": "always, on darwin"
+    },
+    {
+      "id": "GOTCHA-010",
+      "category": "process",
+      "rule": "Write acceptance criteria scoped by OUTCOME, not by cause. A criterion naming one trigger ('with JS disabled') is satisfied by a second trigger with the same symptom, and the agent is right to call it met.",
+      "why_it_matters": "This is the contract-level root of GOTCHA-001, which recurred in 2 of 2 stages writing client JS. Both agents satisfied their criterion exactly as written and shipped the failure it was meant to prevent.",
+      "observed_instances": [
+        "6-theme-toggle.md AC1 and 5-home-envelope.md AC1 - both cause-scoped to 'JS disabled'; denied storage bypassed both.",
+        "Both AC1s were amended by Sarah on 2026-08-18 with an outcome-scoped clause: 'For any error: do not display a control that can't do anything.' 10-launch.md gained a matching cookies-and-storage-blocked walk-through."
+      ],
+      "observed_models": [],
+      "confidence_score": 0.93,
+      "inject_into": [
+        "orchestrator"
+      ],
+      "inject_when": "authoring or amending a stage contract"
+    }
+  ],
+  "agent_performance_ledger": {
+    "_note": "Sample is Stages 3-8 of one project: 6 builder dispatches, 6 L1 reviews. Rates are observed counts over that sample, not statistical estimates. 'first_pass_merge_rate' means merged with no follow-up commit required.",
+    "implementer": {
+      "preferred_model": "claude-sonnet-5",
+      "fallback_model": "claude-opus-5",
+      "dispatches": 5,
+      "build_pass_rate": 1.0,
+      "scope_compliance_rate": 1.0,
+      "first_pass_merge_rate": 0.0,
+      "notes": "Every implementer dispatch built cleanly, passed all five gates and stayed exactly inside IN SCOPE - but every one needed a follow-up commit after review. Fixes averaged a few lines. Failures cluster at seams between stages and at things no contract mentioned, never inside the stage's own work.",
+      "frequent_failure_modes": [
+        "Unguarded storage access (GOTCHA-001) - 2 of 2 stages writing client JS",
+        "Positioning an element against a container while reserving space in its children (GOTCHA-003)",
+        "Defending a hardcoded timer with a race that does not exist under prefers-reduced-motion",
+        "Adding modest unprompted polish (a card frame, a seam hairline) - reviewed as in-scope each time, not a defect"
+      ],
+      "strengths": [
+        "Never touched a frozen file across 5 dispatches",
+        "Never wrote outside IN SCOPE, including when blocked - reported instead",
+        "Flagged its own guesses rather than presenting them as decisions"
+      ]
+    },
+    "content-worker": {
+      "preferred_model": "claude-sonnet-5",
+      "fallback_model": "claude-opus-5",
+      "definition_says": "haiku",
+      "dispatches": 1,
+      "build_pass_rate": 1.0,
+      "notes": "Dispatched on Sonnet by per-spawn override, not by editing the agent file. The recorded decision in 06e1f9f put Wave 2 agents on Sonnet; .claude/agents/content-worker.md says haiku, which is drift from AGENTS.md being dissolved. Unruled by Sarah.",
+      "frequent_failure_modes": [
+        "Filled a semantic gap a closed REQUIRED READING made unknowable (GOTCHA-006) - flagged it, which is correct conduct"
+      ],
+      "strengths": [
+        "Reproduced fixed contract copy codepoint-exact across 8 values",
+        "Used the contract's placeholder-and-flag instruction rather than inventing wordmarks"
+      ]
+    },
+    "code-reviewer": {
+      "preferred_model": "claude-opus-5",
+      "fallback_model": "claude-sonnet-5",
+      "definition_says": "sonnet",
+      "dispatches": 6,
+      "completed": 4,
+      "died_on_infrastructure": 2,
+      "notes": "Dispatched on Opus throughout, matching 06e1f9f's 'reviewers stay on Opus' rather than the agent file. Sarah ruled the expert panel runs on Sonnet (2026-08-18); the per-stage reviewer is still unruled. Highest-value gate in the system: found the only two defects that would have reached a guest.",
+      "highest_value_findings": [
+        "Seal overlapping the headline in the shipping theme - found by MEASURING in headless Chrome, not by reading CSS. No automated gate renders geometry.",
+        "Unguarded storage leaving a dead toggle, which led the orchestrator to the same bug in envelope.js and in the frozen shell",
+        "Third-party rights metadata in a published binary",
+        "Copy authored in four themes and rendered by nothing, green under CI"
+      ],
+      "frequent_failure_modes": [
+        "None observed on substance. Both incomplete runs were infrastructure (session limit, machine sleep), not review quality."
+      ],
+      "cost_note": "~50-75k tokens per review, close to the builder it reviews. On this project review costs roughly as much as building."
+    },
+    "expert-reviewer": {
+      "preferred_model": "claude-sonnet-5",
+      "fallback_model": "claude-opus-5",
+      "dispatches": 0,
+      "notes": "Sarah ruled 2026-08-18 that the panel runs on Sonnet, overriding the Opus-for-reviewers line in 06e1f9f and matching expert-reviewer.md as written. Not yet dispatched - runs once on merged alpha at the features group boundary.",
+      "frequent_failure_modes": []
+    }
+  },
+  "orchestrator_lessons": [
+    "Verify agent reports rather than relaying them. Three claims were wrong or incomplete on inspection: a 'met' criterion that was actually unmet, a footer reported non-empty that my own grep initially misread as empty, and a fix reported done that needed its scope re-checked against a moved alpha.",
+    "Diff against the merge-base, not alpha, once alpha has moved. `git diff alpha..HEAD` on a stale branch shows sibling stages as deletions and looks like a scope violation.",
+    "Mutation-test a new gate before trusting it. Three mutations on Stage 3 (revert the fix, change the percentage, add an unclassified token) each correctly failed the build - that is what made the check credible, not the passing run.",
+    "A dying subagent's last line can be the most valuable thing it produced. The Stage 5 review died mid-sentence comparing envelope.js to the theme.js fix; following that hint by hand found a blocker before the retry ran.",
+    "Do not stretch a user's ruling past what they said. Sarah ruled on the panel's model; extending that to the per-stage reviewer mid-group would have changed the gate under already-reviewed stages.",
+    "Put worktrees where the user can read them. The session scratchpad is invisible from the project directory; ~/Documents/projects/shindig-worktrees was already named in settings.local.json."
+  ],
+  "active_state_summary": {
+    "last_completed_stage": "STAGE-8 details-page, merged",
+    "merged_this_session": [
+      "STAGE-3",
+      "STAGE-4",
+      "STAGE-6",
+      "STAGE-7",
+      "STAGE-8"
+    ],
+    "pending_dependencies": [
+      "STAGE-5 home-envelope - fixing a blocker",
+      "features group panel - runs on merged alpha once Stage 5 lands"
+    ],
+    "open_for_sarah": [
+      "Frozen _includes/base.liquid:43-47 still has the unguarded storage read (GOTCHA-001). Third instance; the file is frozen.",
+      "reviewer-model-drift: .claude/agents/code-reviewer.md says sonnet, 06e1f9f says Opus. Panel ruled Sonnet; per-stage reviewer unruled.",
+      "Licensing: the details photo composites a Getty/iStock frame with a Taskmaster UK still, on a page that will be publicly reachable. Stripping metadata removed the marker, not the question."
+    ],
+    "recent_failures": [
+      {
+        "stage_id": "STAGE-5",
+        "agent_role": "implementer",
+        "model_used": "claude-sonnet-5",
+        "error_reason": "Seal pinned to the container midpoint while clearance was anchored to the flex boundary - text overlapped the seal in the shipping theme at ordinary widths. Build passed throughout.",
+        "resolution": "Returned to the owning agent with the measured gaps and a shared-origin fix (GOTCHA-003). In progress."
+      },
+      {
+        "stage_id": "STAGE-5",
+        "agent_role": "implementer",
+        "model_used": "claude-sonnet-5",
+        "error_reason": "Unguarded sessionStorage.setItem between preventDefault and navigation killed the only route off '/'",
+        "resolution": "Fixed in 956318c with the constraint from GOTCHA-001 injected explicitly"
+      },
+      {
+        "stage_id": "STAGE-6",
+        "agent_role": "implementer",
+        "model_used": "claude-sonnet-5",
+        "error_reason": "Unguarded localStorage left a visible, focusable toggle that did nothing on click",
+        "resolution": "Fixed in 896985b"
+      },
+      {
+        "stage_id": "STAGE-8",
+        "agent_role": "implementer",
+        "model_used": "claude-sonnet-5",
+        "error_reason": "Reported PARTIAL - the mock photo path named a file that did not exist and was outside IN SCOPE to create",
+        "resolution": "Correct behaviour, not a failure of judgement. Sarah supplied the photo; the orchestrator granted the asset path explicitly (GOTCHA-008)."
+      },
+      {
+        "stage_id": "STAGE-4",
+        "agent_role": "content-worker",
+        "model_used": "claude-sonnet-5",
+        "error_reason": "Wrote callout copy on a guess about its consumer, creating a near-deadlock for Stage 7",
+        "resolution": "Contract defect, not agent defect (GOTCHA-006). Sarah amended 7-rsvp-page.md to remove the conflicting requirement."
+      },
+      {
+        "stage_id": "REVIEW-INFRA",
+        "agent_role": "code-reviewer",
+        "model_used": "claude-opus-5",
+        "error_reason": "Two reviews terminated early - one on a session usage limit, one when the machine slept. Both returned nothing usable.",
+        "resolution": "Re-dispatched with build/scope pre-verified by the orchestrator to cut cost. Lesson: cap concurrent Opus reviews at two."
+      }
+    ]
+  }
+}

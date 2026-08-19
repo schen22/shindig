@@ -1,0 +1,166 @@
+/* ============================================================================
+   styles/layout.css — Wave 1b. PRD §4.7.1, §4.7.2, §8.3.
+
+   The page shell and the two pieces of chrome Wave 0 froze: .site-header
+   (wordmark, nav, toggle slot) and .site-footer. Mobile-first; the only media
+   query widens the gutter.
+
+   Class names come from _includes/*.liquid, which are frozen (AGENTS.md §5) —
+   nothing here invents a hook or asks for markup that does not exist. Component
+   interiors are not here: styles/components/*.css is Wave 2's, globbed after
+   this file, and every selector below is a single class so a component never has
+   to fight specificity to override it (AGENTS.md §2.1).
+   ============================================================================ */
+
+/* ── Page shell ─────────────────────────────────────────────────────────────
+   A flex column so a short page (/rsvp before the iframe loads, /details) keeps
+   its footer at the bottom instead of halfway up. dvh, not vh — mobile browser
+   chrome otherwise changes the height as the address bar collapses (§5.1).
+
+   The skip link is absolutely positioned in both states (base.css) so it is not
+   a row in this column. */
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
+
+.main-content {
+  flex: 1 1 auto;
+}
+
+/* The page gutter is applied ONLY when the header is present — i.e. on every
+   page except Home, where base.liquid's `{% unless page.url == "/" %}` guards
+   drop both header and footer (§4.7.1, §4.7.2).
+
+   Home must carry no padding at all: §5.1's envelope is min-height: 100dvh with
+   the seam centred on the VIEWPORT, and a gutter here would push it past the
+   viewport and hand the one page with no chrome a scrollbar. Using the sibling
+   combinator rather than :has() is deliberate — :has() is not in Firefox until
+   121, above the §3.1 floor of Firefox 113, and this is not a rule that may
+   silently not apply. */
+.site-header ~ .main-content {
+  width: 100%;
+  max-width: var(--page-max);
+  margin: 0 auto;
+  padding: var(--space-lg) var(--space-md) var(--space-xl);
+}
+
+/* ── Header — §4.7.1 ────────────────────────────────────────────────────────
+   Wordmark left; nav links then the theme toggle right. DOM order is the tab
+   order (§4.6) and this lays out in that same order, so the two never disagree.
+
+   Not sticky: nothing on three pages needs it, and a sticky bar over the /rsvp
+   iframe would cover form fields as a visitor tabs into them. */
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-sm) var(--space-md);
+  width: 100%;
+  max-width: var(--page-max);
+  margin: 0 auto;
+  padding: var(--space-md);
+  border-bottom: 1px solid var(--t-line);
+}
+
+/* §8.3: text in the theme's display face, not a badge. margin-right: auto
+   pushes the nav and the toggle to the right edge — and does so whether or not
+   the toggle renders, since it is absent without JavaScript (§4.7.3) and the nav
+   must not shift when it appears.
+
+   NOTE for Sarah — the approved mock draws this as a 42px circle with a 2px
+   primary border; §4.7.1 says "Text, not a circular badge". The PRD wins on
+   requirements (AGENTS.md header), so this is text. Flagged in the Wave 1b
+   report; frozen base.liquid ships a plain <a class="wordmark">, so either
+   rendering is reachable in pure CSS if the decision changes. */
+.wordmark {
+  margin-right: auto;
+  font-family: var(--t-display);
+  font-weight: 800;
+  font-size: 1.4rem;
+  letter-spacing: 0.06em;
+  color: var(--t-primary);
+  text-decoration: none;
+  line-height: 1;
+}
+
+.site-nav {
+  display: flex;
+}
+
+.nav-items {
+  display: flex;
+  gap: var(--space-md);
+  margin: 0;
+  padding: 0;
+  max-width: none;
+  list-style: none;
+}
+
+/* §8.3. A 2px --t-primary underline on the active link and nothing else — no
+   pills, no background highlights (§4.7.1). The transparent border is always
+   there so the active state changes colour rather than height, and the link
+   never moves as you tab across the nav. aria-current carries the same
+   information for a screen reader (§4.6.4); the underline is not alone. */
+.nav-items a {
+  color: var(--t-ink);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: var(--fs-sm);
+  padding-bottom: 3px;
+  border-bottom: 2px solid transparent;
+}
+
+.nav-items a[aria-current="page"] {
+  border-bottom-color: var(--t-primary);
+}
+
+.nav-items a:hover {
+  color: var(--t-primary);
+}
+
+/* ── Footer — §4.7.2 ────────────────────────────────────────────────────────
+   One theme-supplied line plus its link. Chrome, so it is absent on Home for
+   the same reason the header is; the guard is base.liquid's. */
+.site-footer {
+  width: 100%;
+  max-width: var(--page-max);
+  margin: 0 auto;
+  padding: var(--space-md);
+  border-top: 1px solid var(--t-line);
+}
+
+.footer-line {
+  margin: 0;
+  max-width: var(--measure);
+  font-family: var(--t-mono);
+  font-size: var(--fs-xs);
+  line-height: var(--lh-body);
+  color: var(--t-muted);
+}
+
+.footer-line a {
+  color: var(--t-primary);
+}
+
+/* ── Wider than a phone ─────────────────────────────────────────────────────
+   Mobile-first (§3.1): one breakpoint, and it only opens up the gutter. */
+@media (min-width: 40em) {
+  .site-header,
+  .site-footer {
+    padding: var(--space-md) var(--space-lg);
+  }
+
+  .site-header ~ .main-content {
+    padding: var(--space-xl) var(--space-lg);
+  }
+
+  .wordmark {
+    font-size: 1.55rem;
+  }
+
+  .nav-items a {
+    font-size: var(--fs-md);
+  }
+}

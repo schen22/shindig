@@ -1,0 +1,94 @@
+/* ============================================================================
+   styles/components/toggle.css — Stage 6.
+
+   The header's light/dark control. Sun = light, crescent moon = dark, each
+   bound to a state entirely through the attribute selectors below — never
+   swapped by the click handler in theme.js, which only ever flips
+   [data-theme] on <html>. Three states, in ascending priority:
+
+     1. no [data-theme] at all, OS preference light  -> sun    (base rule)
+     2. no [data-theme] at all, OS preference dark    -> moon  (media query)
+     3. [data-theme="light"] / [data-theme="dark"]    -> explicit, wins outright
+
+   Absent without JS: `html.js` comes from the frozen inline script in
+   base.liquid, applied before first paint. Without it this rule never
+   matches and the button never renders at all — a toggle with no working
+   write path (theme.js is deferred and may not have run yet) must be
+   absent, not dead (Stage 6).
+
+   Motion is the seal's choreography at the short pair from tokens.css
+   (§4.7.3 shared motion): same curve, same spin-and-fade, sized for a 17px
+   glyph instead of the envelope's. The palette itself carries no transition
+   — it flips on the [data-theme] attribute the same frame as the click: the
+   icon's exit trails that change, it never gates it.
+   ============================================================================ */
+
+.theme-toggle {
+  display: none;
+  position: relative;
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0;
+  border: 1px solid var(--t-line);
+  border-radius: var(--t-radius);
+  background: var(--t-card);
+  color: var(--t-ink);
+  cursor: pointer;
+}
+
+html.js .theme-toggle {
+  display: inline-flex;
+}
+
+.theme-toggle__icon {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 17px;
+  height: 17px;
+  opacity: 0;
+  transform: rotate(-180deg) scale(0.5);
+  transition:
+    opacity var(--fade-sm) var(--ease-envelope),
+    transform var(--spin-sm) var(--ease-envelope);
+}
+
+/* Resting default: light, sun shown, moon hidden. */
+.theme-toggle__icon--sun {
+  opacity: 1;
+  transform: rotate(0deg) scale(1);
+}
+
+/* No explicit choice yet — defer to the OS preference. */
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme]) .theme-toggle__icon--sun {
+    opacity: 0;
+    transform: rotate(180deg) scale(0.5);
+  }
+
+  html:not([data-theme]) .theme-toggle__icon--moon {
+    opacity: 1;
+    transform: rotate(0deg) scale(1);
+  }
+}
+
+/* Explicit choice always wins, OS preference or not. */
+html[data-theme="dark"] .theme-toggle__icon--sun {
+  opacity: 0;
+  transform: rotate(180deg) scale(0.5);
+}
+
+html[data-theme="dark"] .theme-toggle__icon--moon {
+  opacity: 1;
+  transform: rotate(0deg) scale(1);
+}
+
+html[data-theme="light"] .theme-toggle__icon--sun {
+  opacity: 1;
+  transform: rotate(0deg) scale(1);
+}
+
+html[data-theme="light"] .theme-toggle__icon--moon {
+  opacity: 0;
+  transform: rotate(-180deg) scale(0.5);
+}
