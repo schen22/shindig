@@ -83,20 +83,32 @@ stages:
 
   - id: 10
     name: launch
-    status: walked-with-failures
+    status: complete
     note: >-
       Every criterion recorded pass/fail/deferred on 2026-08-18 (the contract's
       STOP condition). Two real defects found, both needing their own stage
       since Stage 10 NOT INCLUDED bars fixing in place: headers-not-deployed
       and details-last-updated-stale. Launch is blocked on those plus the
       [human] items, chiefly real-party-values.
-      Both defects were cleared by Stage 11 (3f1ce2d). Stage 10 now needs a
-      RE-WALK of the two failed criteria, and its post-merge block still cannot
-      be walked until Sarah merges alpha to main - there is no preview deploy.
-      Both [human] items are DONE - Sarah confirmed on 2026-08-18 that a test
-      response landed in the private Sheet (still private) and that closing the
-      Form on the deadline is handled. What remains is the post-merge block,
-      which needs the live site and therefore needs Sarah's merge first.
+      Both defects were cleared by Stage 11 (3f1ce2d). Both [human] items are
+      DONE - Sarah confirmed on 2026-08-18 that a test response landed in the
+      private Sheet (still private) and that closing the Form on the deadline is
+      handled.
+      POST-MERGE BLOCK WALKED on the live site 2026-08-18, against origin/main
+      4fb49a3, and it all passes:
+        referrer-policy: no-referrer      present on a real response to /
+        x-content-type-options: nosniff   present
+        robots.txt                        served, "User-agent: * / Disallow: /"
+        noindex meta                      content="noindex, nofollow"
+        /details last updated             August 18, 2026 (the re-walk)
+        fonts                             all three 200 from /assets/fonts/
+        preload                           fraunces.woff2, rel=preload as=font
+        site.css                          11,750 bytes, minified in production
+      The last line is live proof that dropping NODE_ENV from netlify.toml did
+      not cost minification. Stage 11's headers fix is confirmed working in
+      production, not just in _site.
+      STAGE 10 IS CLOSED. What is not yet live is Stage 12's back-button fix -
+      envelope.js on the deployed site has no pageshow handler. One more merge.
 
 approved_decisions:
   - Eleventy v3, ESM, Liquid templates; Markdown for /details
