@@ -81,8 +81,10 @@ stages:
       Both defects were cleared by Stage 11 (3f1ce2d). Stage 10 now needs a
       RE-WALK of the two failed criteria, and its post-merge block still cannot
       be walked until Sarah merges alpha to main - there is no preview deploy.
-      Remaining [human] items: the test response into the private Sheet, and
-      closing the Form on the deadline.
+      Both [human] items are DONE - Sarah confirmed on 2026-08-18 that a test
+      response landed in the private Sheet (still private) and that closing the
+      Form on the deadline is handled. What remains is the post-merge block,
+      which needs the live site and therefore needs Sarah's merge first.
 
 approved_decisions:
   - Eleventy v3, ESM, Liquid templates; Markdown for /details
@@ -122,6 +124,18 @@ approved_decisions:
     matching 06e1f9f and how Stages 4-7 were actually dispatched. The expert
     panel stays on Sonnet. code-reviewer.md's "model: sonnet" line is now the
     stale one. Closes reviewer-model-drift.
+  - netlify.toml does NOT set NODE_ENV, and it must not be re-added - Sarah's
+    call (2026-08-18), after the production build failed on it. Netlify applies
+    build.environment to the install step, and npm skips devDependencies when
+    NODE_ENV=production - which is every dependency this project has, Eleventy
+    and lightningcss included, so the build died before minifying anything.
+    Minification is unaffected: package.json's `build` script sets
+    NODE_ENV=production inline on the eleventy invocation, which is the process
+    that reads it (src/assets/site.css.11ty.js:108). Verified with NODE_ENV
+    unset - 11.5 KB minified, not 37.5 KB. tests/output.js:94-116 re-renders
+    both sheets and fails the build if the unminified one reached _site, so the
+    silent version of this cannot ship. NPM_FLAGS="--include=dev" would also
+    work and was rejected as a second moving part that re-arms the trap.
   - No page-entry fade on /rsvp/ - considered and dropped (2026-08-18). Scoping
     it to that one page needed either a wrapper element in Stage 7's template
     or :has(), which shipped in Firefox 121 and breaks the 113 floor.
@@ -388,7 +402,15 @@ deferred:
       minification claim in the docs has to change with it. If it was a stray
       edit made while testing the launch, it should come out before the next
       deploy of main.
+      RESOLVED 2026-08-18. Deliberate, and correct - Sarah removed it because
+      the production build failed on it. The orchestrator's claim that it would
+      ship unminified CSS was WRONG: package.json sets NODE_ENV=production
+      inline on the eleventy invocation, so build.environment never gated
+      minification at all. The netlify.toml line was redundant and harmful only
+      at install time. Recorded in approved_decisions; alpha now matches main,
+      with the reasoning written into netlify.toml so it is not re-added.
     decided: 2026-08-18
+    resolved: 2026-08-18
 
   - id: live-main-predates-the-headers-fix
     note: >-

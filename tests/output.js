@@ -97,7 +97,9 @@ if (partySelectors.length) {
 // Both branches are generated here from the same module the build uses, so the
 // dev path is genuinely exercised rather than assumed. The emitted file is then
 // compared against the production branch — which is what catches NODE_ENV being
-// wrong in netlify.toml, the failure mode that ships unminified CSS in silence.
+// wrong for the eleventy process, the failure mode that ships unminified CSS in
+// silence. It is set inline in package.json's `build` script, NOT in
+// netlify.toml, which must not set it (see the comment there).
 const prod = buildCSS(liveName, { minify: true });
 const dev = buildCSS(liveName, { minify: false });
 
