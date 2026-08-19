@@ -1,7 +1,7 @@
 # Execution state only. Not a second copy of the product definition.
 # The orchestrator reads this first and writes it last.
 
-current_stage: 11
+current_stage: 12
 
 stages:
   - id: 0
@@ -69,22 +69,46 @@ stages:
       under deferred. The third was declined as contract-barred and is recorded
       as headers-guard-is-artifact-only.
 
+  - id: 12
+    name: bfcache-reset
+    status: complete
+    merged: d9604f4
+    note: >-
+      Back from /rsvp/ landed on a blank page. Found by Sarah on the deployed
+      site, 2026-08-18. Written and applied by the ORCHESTRATOR - the
+      implementer agent type was withdrawn - and NOT independently reviewed,
+      because the code-reviewer type was withdrawn too. L1 was not met; this is
+      recorded rather than claimed. Acceptance criteria 1-5 are browser-only and
+      are still unwalked: the build cannot see this defect or its fix.
+
   - id: 10
     name: launch
-    status: walked-with-failures
+    status: complete
     note: >-
       Every criterion recorded pass/fail/deferred on 2026-08-18 (the contract's
       STOP condition). Two real defects found, both needing their own stage
       since Stage 10 NOT INCLUDED bars fixing in place: headers-not-deployed
       and details-last-updated-stale. Launch is blocked on those plus the
       [human] items, chiefly real-party-values.
-      Both defects were cleared by Stage 11 (3f1ce2d). Stage 10 now needs a
-      RE-WALK of the two failed criteria, and its post-merge block still cannot
-      be walked until Sarah merges alpha to main - there is no preview deploy.
-      Both [human] items are DONE - Sarah confirmed on 2026-08-18 that a test
-      response landed in the private Sheet (still private) and that closing the
-      Form on the deadline is handled. What remains is the post-merge block,
-      which needs the live site and therefore needs Sarah's merge first.
+      Both defects were cleared by Stage 11 (3f1ce2d). Both [human] items are
+      DONE - Sarah confirmed on 2026-08-18 that a test response landed in the
+      private Sheet (still private) and that closing the Form on the deadline is
+      handled.
+      POST-MERGE BLOCK WALKED on the live site 2026-08-18, against origin/main
+      4fb49a3, and it all passes:
+        referrer-policy: no-referrer      present on a real response to /
+        x-content-type-options: nosniff   present
+        robots.txt                        served, "User-agent: * / Disallow: /"
+        noindex meta                      content="noindex, nofollow"
+        /details last updated             August 18, 2026 (the re-walk)
+        fonts                             all three 200 from /assets/fonts/
+        preload                           fraunces.woff2, rel=preload as=font
+        site.css                          11,750 bytes, minified in production
+      The last line is live proof that dropping NODE_ENV from netlify.toml did
+      not cost minification. Stage 11's headers fix is confirmed working in
+      production, not just in _site.
+      STAGE 10 IS CLOSED. What is not yet live is Stage 12's back-button fix -
+      envelope.js on the deployed site has no pageshow handler. One more merge.
 
 approved_decisions:
   - Eleventy v3, ESM, Liquid templates; Markdown for /details
@@ -456,4 +480,34 @@ deferred:
     decided: 2026-08-18
     resolved: 2026-08-18
 
-last_approved_alpha: 1084479
+  - id: one-writer-exception-stage-12
+    note: >-
+      Second use of the exception Sarah authorised on 2026-08-18. The
+      orchestrator wrote public/assets/js/envelope.js and the comment block at
+      styles/components/envelope.css:179-186, both Stage 5's implementer's
+      files. That agent type no longer exists, so there was nobody to route the
+      defect to. See one-writer-exception-stage-11.
+
+  - id: no-independent-review-after-stage-11
+    note: >-
+      BOTH reviewer agent types - code-reviewer and expert-reviewer - were
+      withdrawn mid-project, along with implementer and content-worker. Stage 12
+      therefore shipped on the orchestrator's own reading plus npm run build,
+      with no second pair of eyes. Every review level in
+      workflows/stage-execution.md above L0 is now unmeetable as written. If
+      more stages follow, either the agent types come back or the review table
+      needs rewriting to say what is actually possible. Not a defect in Stage
+      12; a hole in the process from here on.
+    decided: 2026-08-18
+
+  - id: bfcache-criteria-unwalked
+    note: >-
+      Stage 12's acceptance criteria 1-5 need a real browser and are NOT done:
+      Back shows a closed envelope with a clickable seal; the seal still works
+      from the restored page; the seal takes focus and shows a ring; no reverse
+      animation on restore; same under prefers-reduced-motion. The build cannot
+      check any of them. Walk them on the live site after the merge to main,
+      alongside Stage 10's post-merge block - or locally against _site first.
+    decided: 2026-08-18
+
+last_approved_alpha: d9604f4
