@@ -21,6 +21,13 @@
     0 2px 8px var(--t-line);
 }
 
+/* First thing on /details/, so the gutter above it is already supplied by
+   .site-header ~ .main-content's padding (layout.css) — its own top margin
+   would double that gap. The seal's 1.25rem overhang sits in the gutter. */
+.callout:first-child {
+  margin-top: 0;
+}
+
 /* Seal emblem straddling the top edge. Decorative only — drawn from the wax
    tokens rather than any asset or text, so it never needs a copy key and
    never competes with the page's other ornament. */
