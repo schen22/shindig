@@ -23,6 +23,13 @@
     // transform mid-flight, which would read as a counter-spin.
     if (envelope.classList.contains("is-opening")) return;
 
+    // Read once, from the element already in hand. Used for both the
+    // prefetch and the navigation below so the two can never disagree, and
+    // read before preventDefault so a missing/empty href falls through to
+    // whatever the browser would have done anyway.
+    var dest = seal.getAttribute("href");
+    if (!dest) return;
+
     event.preventDefault();
 
     envelope.classList.add("is-opening");
@@ -39,10 +46,11 @@
     // navigation must never depend on it having succeeded — an unhandled
     // rejection here would be a console error on every visit for anyone
     // offline or behind a blocker.
-    try {
-      fetch("/rsvp/", { credentials: "same-origin" }).catch(function () {});
-    } catch (e) {}
-
+    if (dest.charAt(0) === "/" && dest.charAt(1) !== "/") {
+      try {
+        fetch(dest, { credentials: "same-origin" }).catch(function () {});
+      } catch (e) {}
+    }
     // Invisible must not mean focusable: the seal starts fading/spinning
     // immediately (or, under reduced motion, is already visually gone within
     // 0.01ms — see below), so it comes out of the tab order for whatever
@@ -65,7 +73,7 @@
     function go() {
       if (gone) return;
       gone = true;
-      location.assign("/rsvp/");
+      location.assign(dest);
     }
 
     if (top) {

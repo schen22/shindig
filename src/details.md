@@ -23,7 +23,7 @@ titleKey: titleDetails
   <span class="callout__seal" aria-hidden="true"></span>
   <p class="callout__eyebrow">Insert attention grabbing text</p>
   <p class="callout__body">
-    <a href="/rsvp/">Rsvp</a> by <strong>Sunday, Aug 23</strong> and i'll follow through. This page will have finalized deets after!
+    Date finalized! Please fill out the <a href="/https://forms.gle/3fsynXeHFPaYjCmX6/">gform</a> if you haven't already to help with grouping though. Thank youuu :D
   </p>
 </div>
 
