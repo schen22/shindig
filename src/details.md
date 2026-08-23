@@ -9,7 +9,7 @@ titleKey: titleDetails
   <span class="callout__seal" aria-hidden="true"></span>
   <p class="callout__eyebrow">Insert attention grabbing text</p>
   <p class="callout__body">
-    Date finalized! Please fill out the <a href="/https://forms.gle/3fsynXeHFPaYjCmX6/">gform</a> if you haven't already to help with grouping. Thank youuu :D
+    Date finalized! Please fill out the <a href="https://forms.gle/3fsynXeHFPaYjCmX6/">gform</a> if you haven't already to help with grouping. Thank youuu :D
   </p>
 </div>
 
