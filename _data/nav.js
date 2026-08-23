@@ -4,6 +4,6 @@
 // across all four themes, because wayfinding is the one thing that shouldn't
 // change costume. Do not move these into _data/themes.js.
 export default [
-  { label: "RSVP", url: "/rsvp/" },
   { label: "Details", url: "/details/" },
+  { label: "RSVP", url: "/rsvp/" },
 ];

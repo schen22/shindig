@@ -5,6 +5,14 @@ titleKey: titleDetails
 
 {%- assign theme = themes[site.partyTheme] -%}
 
+<div class="callout">
+  <span class="callout__seal" aria-hidden="true"></span>
+  <p class="callout__eyebrow">Insert attention grabbing text</p>
+  <p class="callout__body">
+    Date finalized! Please fill out the <a href="/https://forms.gle/3fsynXeHFPaYjCmX6/">gform</a> if you haven't already to help with grouping. Thank youuu :D
+  </p>
+</div>
+
 # {{ theme.titleDetails }}
 
 {{ theme.detailsIntro }}
@@ -18,14 +26,6 @@ titleKey: titleDetails
   <li><span class="detail-list__label">Do I need to bring anything</span> — just yourself. feel free to bring a friend or snacks if you want</li>
   <li><span class="detail-list__label">Add to calendar</span> — download the <a href="/assets/details.ics">.ics</a> or add via <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=A+Shindig+Thingamajig&amp;dates=20260926T210000Z%2F20260926T230000Z&amp;details=Hang+out+with+Sarah+and+friends.+Details%3A+https%3A%2F%2Fshindig-thingamajig.netlify.app%2Fdetails%2F&amp;location=Eagle+Park%2C+Mountain+View%2C+CA">gCal</a></li>
 </ul>
-
-<div class="callout">
-  <span class="callout__seal" aria-hidden="true"></span>
-  <p class="callout__eyebrow">Insert attention grabbing text</p>
-  <p class="callout__body">
-    Date finalized! Please fill out the <a href="/https://forms.gle/3fsynXeHFPaYjCmX6/">gform</a> if you haven't already to help with grouping though. Thank youuu :D
-  </p>
-</div>
 
 <figure class="detail-photo">
   <img src="/assets/images/taskmaster_uk_16_01_framed.jpg"

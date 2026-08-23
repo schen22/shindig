@@ -21,14 +21,14 @@ export default {
     eyebrow: "Task #1",
     headline: "Partake in a Shindig Thingamajig",
     subheadline: "i.e. come and have fun!",
-    tagline: "Sarah edition",
+    tagline: "Taskmaster Sarah edition",
     sealLabel: "Deets",
     titleHome: "A Shindig Thingamajig",
     titleRsvp: "Task #2: Reply",
     titleDetails: "What to expect",
     calloutTitle: "Hangout with awesome friends (i.e. me)",
     calloutBody:
-      " Respond when you get this, or latest by Sunday, 8/22 pl0x. If the form's stuck, there's a link to it directly below the embedded attempt lulz.",
+      " Fill out the google form latest by Sunday, 8/23 pl0x. If the form's stuck, there's a link to it directly below the embedded attempt lulz.",
     detailsIntro:
       "Good vibes. Honestly just show up and see what happens. This website is an entirely extra and unnecessary use of time and resources given I could've just sent the google form, but shhh. Anyways, here's what to expect:",
     footerLine: "Made with bots and healthy skepticism.",
