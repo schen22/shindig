@@ -11,3 +11,7 @@ tho also an excuse to try out "agentic orchestration"
 2. start local server: `eleventy --serve`
 
 Hosted on netlify, built with eleventy, minimal css/js. google form really doing the heavy lifting cause i opted to not create a db and form inputs lulz
+
+## License
+
+[MIT](LICENSE).
